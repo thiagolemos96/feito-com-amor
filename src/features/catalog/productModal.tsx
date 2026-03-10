@@ -5,7 +5,7 @@ import { useUpload } from '../../hooks/useUpload'
 
 type ProductFormData = Omit<Product, 'id'>
 interface ProductModalProps { product?: Product | null; onSave: (data: ProductFormData) => void; onClose: () => void }
-const EMPTY: ProductFormData = { name: '', description: '', price: 0, stock: 0, image: '🪵' }
+const EMPTY: ProductFormData = { name: '', description: '', price: 0, quantity: 0, image: '🪵' }
 
 export function ProductModal({ product, onSave, onClose }: ProductModalProps) {
   const [form, setForm] = useState<ProductFormData>(EMPTY)
@@ -14,7 +14,7 @@ export function ProductModal({ product, onSave, onClose }: ProductModalProps) {
 
   useEffect(() => {
     if (product) {
-      setForm({ name: product.name, description: product.description, price: product.price, stock: product.quantity, image: product.image })
+      setForm({ name: product.name, description: product.description, price: product.price, quantity: product.quantity, image: product.image })
       setPreview(product.image.startsWith('http') ? product.image : null)
     } else {
       setForm(EMPTY)
@@ -35,7 +35,7 @@ export function ProductModal({ product, onSave, onClose }: ProductModalProps) {
 
   const handleSave = () => {
     if (!form.name || !form.price) return
-    onSave({ ...form, price: Number(form.price), stock: Number(form.quantity) })
+    onSave({ ...form, price: Number(form.price), quantity: Number(form.quantity) })
   }
 
   return (
@@ -75,7 +75,7 @@ export function ProductModal({ product, onSave, onClose }: ProductModalProps) {
           <Input type="number" value={form.price} onChange={e => set('price', e.target.value)} />
         </FormField>
         <FormField label="Qtd em Estoque">
-          <Input type="number" value={form.quantity} onChange={e => set('stock', e.target.value)} />
+          <Input type="number" value={form.quantity} onChange={e => set('quantity', e.target.value)} />
         </FormField>
       </div>
 
