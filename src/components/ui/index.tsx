@@ -146,7 +146,7 @@ export function FormField({ label, children }: FormFieldProps) {
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '10px 14px', border: '1px solid var(--border)',
+  width: 'stretch', padding: '10px 14px', border: '1px solid var(--border)',
   borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: 14,
   background: 'var(--bg)', color: 'var(--text)', outline: 'none',
 }
