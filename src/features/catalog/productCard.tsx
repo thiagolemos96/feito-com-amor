@@ -25,10 +25,17 @@ export function ProductCard({ product, onEdit, onRemove }: ProductCardProps) {
       background: 'var(--surface)', border: '1px solid var(--border)',
       borderRadius: 14, padding: 20, transition: 'box-shadow 0.15s',
     }}>
-      <div style={{ fontSize: 36, marginBottom: 12 }}>{product.image}</div>
-      <span style={{ fontSize: 11, color: 'var(--text2)', background: 'var(--surface2)', padding: '2px 8px', borderRadius: 4, display: 'inline-block', marginBottom: 8 }}>
-        {product.category}
-      </span>
+      <div style={{ marginBottom: 12 }}>
+        {product.image.startsWith('http') ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            style={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }}
+          />
+        ) : (
+          <div style={{ fontSize: 36 }}>{product.image}</div>
+        )}
+      </div>
       <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 600, marginBottom: 3 }}>{product.name}</div>
       <div style={{ fontSize: 12.5, color: 'var(--text2)', marginBottom: 12, lineHeight: 1.4 }}>{product.description}</div>
 
@@ -36,7 +43,7 @@ export function ProductCard({ product, onEdit, onRemove }: ProductCardProps) {
         <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: 'var(--accent)' }}>
           {fmt(product.price)}
         </span>
-        <Badge variant={stockVariant(product.stock)}>{stockLabel(product.stock)}</Badge>
+        <Badge variant={stockVariant(product.quantity)}>{stockLabel(product.quantity)}</Badge>
       </div>
 
       <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>

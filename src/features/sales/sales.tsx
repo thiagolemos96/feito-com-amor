@@ -2,11 +2,12 @@ import { useState } from 'react'
 import type { Product, Sale, SaleItem } from '../../types'
 import { fmt, formatDate } from '../../lib/utils'
 import { Button, Modal, FormField, Input, Select, PageHeader } from '../../components/ui'
+import { SELLERS } from '../../types'
 
 interface SalesProps {
   products: Product[]
   sales: Sale[]
-  onAddSale: (items: SaleItem[], notes: string) => void
+  onAddSale: (items: SaleItem[], notes: string, seller: string) => void
 }
 
 interface SaleItemForm {
@@ -18,6 +19,7 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
   const [showModal, setShowModal] = useState(false)
   const [items, setItems] = useState<SaleItemForm[]>([{ productId: '', qty: 1 }])
   const [notes, setNotes] = useState('')
+  const [seller, setSeller] = useState('')
 
   const getProduct = (id: string) => products.find(p => p.id === Number(id))
 
@@ -39,11 +41,15 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
         qty: Number(it.qty),
         unitPrice: getProduct(it.productId)!.price,
       }))
-    if (validItems.length === 0) return
-    onAddSale(validItems, notes)
+    if (validItems.length === 0 || !seller) {
+      alert('Por favor, adicione itens e selecione um vendedor.')
+      return
+    }
+    onAddSale(validItems, notes, seller)
     setShowModal(false)
     setItems([{ productId: '', qty: 1 }])
     setNotes('')
+    setSeller('')
   }
 
   const getProductName = (id: number) => products.find(p => p.id === id)?.name ?? '?'
@@ -64,6 +70,7 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
             <tr>
               <th style={thStyle}>#</th>
               <th style={thStyle}>Data</th>
+              <th style={thStyle}>Vendedor</th>
               <th style={thStyle}>Produtos</th>
               <th style={thStyle}>Total</th>
               <th style={thStyle}>Obs.</th>
@@ -74,6 +81,7 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
               <tr key={s.id}>
                 <td style={{ ...tdStyle, color: 'var(--text2)', fontSize: 12 }}>#{String(s.id).slice(-4)}</td>
                 <td style={{ ...tdStyle, color: 'var(--text2)' }}>{formatDate(s.date)}</td>
+                <td style={{ ...tdStyle, color: 'var(--text2)' }}>{s.seller || '—'}</td>
                 <td style={{ ...tdStyle, fontSize: 13 }}>{s.items.map(it => `${it.qty}x ${getProductName(it.productId)}`).join(', ')}</td>
                 <td style={tdStyle}>
                   <strong style={{ fontFamily: "'Playfair Display', serif", color: 'var(--accent)', fontSize: 16 }}>{fmt(s.total)}</strong>
@@ -91,8 +99,8 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 10, background: 'var(--surface2)', borderRadius: 8, marginBottom: 8 }}>
               <Select value={it.productId} onChange={e => updateItem(i, 'productId', e.target.value)} style={{ flex: 1 }}>
                 <option value="">Selecionar produto...</option>
-                {products.filter(p => p.stock > 0).map(p => (
-                  <option key={p.id} value={p.id}>{p.image} {p.name} — {fmt(p.price)}</option>
+                {products.filter(p => p.quantity > 0).map(p => (
+                  <option key={p.id} value={p.id}>{p.name} — {fmt(p.price)}</option>
                 ))}
               </Select>
               <Input type="number" min={1} value={it.qty} onChange={e => updateItem(i, 'qty', e.target.value)} style={{ width: 65 }} />
@@ -103,6 +111,13 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
           ))}
 
           <Button variant="ghost" onClick={addItem} style={{ fontSize: 13, marginBottom: 16 }}>+ Adicionar item</Button>
+
+          <FormField label="Vendedor">
+            <Select value={seller} onChange={e => setSeller(e.target.value)} style={{ flex: 1 }}>
+              <option value="">Selecione quem realizou a venda...</option>
+              {SELLERS.map(s => <option key={s} value={s}>{s}</option>)}
+            </Select>
+          </FormField>
 
           <FormField label="Observação (opcional)">
             <Input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Ex: cliente pediu embrulho..." />
