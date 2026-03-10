@@ -15,6 +15,7 @@ const fetchSales = async (): Promise<Sale[]> => {
     date: s.sold_at.split('T')[0],
     total: s.total,
     notes: s.notes ?? '',
+    seller: s.seller,
     items: s.sale_items.map((it: any) => ({
       productId: it.product_id,
       qty: it.quantity,
@@ -32,18 +33,16 @@ export function useSales() {
   })
 
   const addSale = useMutation({
-    mutationFn: async ({ items, notes }: { items: SaleItem[]; notes: string }) => {
+    mutationFn: async ({ items, notes, seller }: { items: SaleItem[]; notes: string; seller: string }) => {
       const total = items.reduce((acc, it) => acc + it.unitPrice * it.qty, 0)
 
-      // Insere a venda
       const { data: sale, error } = await supabase
         .from('sales')
-        .insert({ total, notes })
+        .insert({ total, notes, seller })  // <-- adiciona seller
         .select()
         .single()
       if (error) throw error
 
-      // Insere os itens
       const { error: itemsError } = await supabase.from('sale_items').insert(
         items.map(it => ({
           sale_id: sale.id,
@@ -56,14 +55,15 @@ export function useSales() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales'] })
-      queryClient.invalidateQueries({ queryKey: ['products'] }) // atualiza estoque
+      queryClient.invalidateQueries({ queryKey: ['products'] })
     },
   })
 
   return {
     sales,
     isLoading,
-    addSale: (items: SaleItem[], notes: string) => addSale.mutate({ items, notes }),
+    addSale: (items: SaleItem[], notes: string, seller: string) =>
+      addSale.mutate({ items, notes, seller }),
     getTotalRevenue: () => sales.reduce((a, s) => a + s.total, 0),
     getAverageSale: () => sales.length ? sales.reduce((a, s) => a + s.total, 0) / sales.length : 0,
   }

@@ -18,8 +18,8 @@ export default function App() {
   const { products, addProduct, updateProduct, removeProduct, adjustStock, decrementStock } = useProducts()
   const { sales, addSale } = useSales()
 
-  const handleAddSale = (items: Parameters<typeof addSale>[0], notes: string) => {
-    addSale(items, notes)
+  const handleAddSale = (items: Parameters<typeof addSale>[0], notes: string, seller: string) => {
+    addSale(items, notes, seller)
   }
 
   if (loading) return null

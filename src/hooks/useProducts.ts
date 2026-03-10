@@ -6,15 +6,11 @@ import type { Product } from '../types'
 const fetchProducts = async (): Promise<Product[]> => {
   const { data, error } = await supabase
     .from('products')
-    .select(`*, stock(quantity)`)
+    .select('*')        // sem o join com stock
     .order('name')
 
   if (error) throw error
-
-  return data.map(p => ({
-    ...p,
-    stock: p.stock?.[0]?.quantity ?? 0,
-  }))
+  return data
 }
 
 export function useProducts() {
@@ -27,15 +23,16 @@ export function useProducts() {
 
   const addProduct = useMutation({
     mutationFn: async (data: Omit<Product, 'id'>) => {
-      const { data: product, error } = await supabase
+      const { error } = await supabase
         .from('products')
-        .insert({ name: data.name, description: data.description, price: data.price, category: data.category, image: data.image })
-        .select()
-        .single()
+        .insert({
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          image: data.image,
+          quantity: data.quantity,   // já vai junto
+        })
       if (error) throw error
-
-      // Cria o registro de estoque junto
-      await supabase.from('stock').insert({ product_id: product.id, quantity: data.stock })
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
   })
@@ -44,13 +41,15 @@ export function useProducts() {
     mutationFn: async ({ id, data }: { id: number; data: Partial<Product> }) => {
       const { error } = await supabase
         .from('products')
-        .update({ name: data.name, description: data.description, price: data.price, category: data.category, image: data.image })
+        .update({
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          image: data.image,
+          quantity: data.quantity,
+        })
         .eq('id', id)
       if (error) throw error
-
-      if (data.stock !== undefined) {
-        await supabase.from('stock').update({ quantity: data.stock, updated_at: new Date().toISOString() }).eq('product_id', id)
-      }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
   })
@@ -67,11 +66,10 @@ export function useProducts() {
     mutationFn: async ({ id, delta }: { id: number; delta: number }) => {
       const product = products.find(p => p.id === id)
       if (!product) throw new Error('Produto não encontrado')
-      const newQty = Math.max(0, product.stock + delta)
       const { error } = await supabase
-        .from('stock')
-        .update({ quantity: newQty, updated_at: new Date().toISOString() })
-        .eq('product_id', id)
+        .from('products')
+        .update({ quantity: Math.max(0, product.quantity + delta) })
+        .eq('id', id)
       if (error) throw error
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),

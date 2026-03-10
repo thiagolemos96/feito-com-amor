@@ -1,6 +1,7 @@
 import type { Product, Sale } from '../../types'
 import { fmt } from '../../lib/utils'
-import { StatCard, PageHeader } from '../../components/ui'
+import { StatCard } from '../../components/ui'
+import { ReportButton } from './ReportButton'
 
 interface FinanceProps {
   sales: Sale[]
@@ -25,13 +26,12 @@ export function Finance({ sales, products }: FinanceProps) {
   const dateEntries = Object.entries(byDate).sort((a, b) => a[0].localeCompare(b[0]))
   const maxDate = Math.max(...dateEntries.map(d => d[1]), 1)
 
-  const byCategory: Record<string, number> = {}
-  sales.forEach(s => s.items.forEach(it => {
-    const p = products.find(pr => pr.id === it.productId)
-    if (p) byCategory[p.category] = (byCategory[p.category] || 0) + it.unitPrice * it.qty
-  }))
-  const catEntries = Object.entries(byCategory).sort((a, b) => b[1] - a[1])
-  const maxCat = Math.max(...catEntries.map(c => c[1]), 1)
+  const bySeller: Record<string, number> = {}
+  sales.forEach(s => {
+    bySeller[s.seller] = (bySeller[s.seller] || 0) + s.total
+  })
+  const sellerEntries = Object.entries(bySeller).sort((a, b) => b[1] - a[1])
+  const maxSeller = Math.max(...sellerEntries.map(c => c[1]), 1)
 
   const BarChart = ({ entries, max, color }: { entries: [string, number][], max: number, color: string }) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -49,13 +49,19 @@ export function Finance({ sales, products }: FinanceProps) {
 
   return (
     <div>
-      <PageHeader title="Financeiro" subtitle="Resumo das receitas da loja" />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+        <div>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700 }}>Financeiro</h2>
+          <p style={{ color: 'var(--text2)', fontSize: 14, marginTop: 4 }}>Resumo das receitas da loja</p>
+        </div>
+        <ReportButton sales={sales} products={products} />
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
         <StatCard label="Receita Total" value={fmt(totalRevenue)} sub={`${sales.length} vendas`} accent="green" />
         <StatCard label="Ticket Médio" value={fmt(avgSale)} sub="por venda" />
-        <StatCard label="Mais Vendido" value={bestProduct?.name ?? '—'} sub={bestProduct?.category} accent="yellow" />
-        <StatCard label="Produtos Ativos" value={String(products.filter(p => p.stock > 0).length)} sub="em estoque" />
+        <StatCard label="Mais Vendido" value={bestProduct?.name ?? '—'} accent="yellow" />
+        <StatCard label="Produtos Ativos" value={String(products.filter(p => p.quantity > 0).length)} sub="em estoque" />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
@@ -64,8 +70,8 @@ export function Finance({ sales, products }: FinanceProps) {
           <BarChart entries={dateEntries} max={maxDate} color="var(--accent)" />
         </div>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 24 }}>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, marginBottom: 20 }}>Receita por Categoria</h3>
-          <BarChart entries={catEntries} max={maxCat} color="var(--green)" />
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, marginBottom: 20 }}>Receita por Vendedor</h3>
+          <BarChart entries={sellerEntries} max={maxSeller} color="var(--green)" />
         </div>
       </div>
     </div>

@@ -16,8 +16,7 @@ export function Catalog({ products, onAdd, onUpdate, onRemove }: CatalogProps) {
   const [editing, setEditing] = useState<Product | null | undefined>(undefined) // undefined = closed
 
   const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.category.toLowerCase().includes(search.toLowerCase())
+    p.name.toLowerCase().includes(search.toLowerCase())
   )
 
   const handleSave = (data: Omit<Product, 'id'>) => {

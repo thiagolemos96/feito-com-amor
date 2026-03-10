@@ -3,8 +3,7 @@ export interface Product {
   name: string
   description: string
   price: number
-  category: string
-  stock: number
+  quantity: number
   image: string
   created_at?: string
 }
@@ -21,6 +20,7 @@ export interface Sale {
   items: SaleItem[]
   total: number
   notes: string
+  seller: string
 }
 
 export type Page = 'dashboard' | 'catalog' | 'stock' | 'sales' | 'finance'
@@ -30,3 +30,6 @@ export type NavItem = {
   label: string
   icon: string
 }
+
+export const SELLERS = ['Fatima', 'Tania', 'Antonio'] as const
+export type Seller = typeof SELLERS[number]

@@ -12,7 +12,7 @@ export function Dashboard({ products, sales }: DashboardProps) {
   const todaySales = sales.filter(s => s.date === TODAY)
   const todayRevenue = todaySales.reduce((a, s) => a + s.total, 0)
   const weekRevenue = sales.reduce((a, s) => a + s.total, 0)
-  const lowStock = products.filter(p => p.stock <= 2)
+  const lowStock = products.filter(p => p.quantity <= 2)
   const recentSales = [...sales].sort((a, b) => b.id - a.id).slice(0, 5)
 
   return (
@@ -67,9 +67,9 @@ export function Dashboard({ products, sales }: DashboardProps) {
               <tbody>
                 {lowStock.map(p => (
                   <tr key={p.id}>
-                    <td style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>{p.image} {p.name}</td>
+                    <td style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>{p.name}</td>
                     <td style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
-                      <Badge variant={p.stock === 0 ? 'red' : 'yellow'}>{p.stock} un.</Badge>
+                      <Badge variant={p.quantity === 0 ? 'red' : 'yellow'}>{p.quantity} un.</Badge>
                     </td>
                   </tr>
                 ))}

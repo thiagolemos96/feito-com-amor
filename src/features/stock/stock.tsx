@@ -13,7 +13,7 @@ export function Stock({ products, onAdjust }: StockProps) {
   const [delta, setDelta] = useState('')
 
   const adjustingProduct = products.find(p => p.id === adjustingId)
-  const sorted = [...products].sort((a, b) => a.stock - b.stock)
+  const sorted = [...products].sort((a, b) => a.quantity - b.quantity)
 
   const handleConfirm = () => {
     if (!adjustingId || !delta) return
@@ -23,7 +23,7 @@ export function Stock({ products, onAdjust }: StockProps) {
   }
 
   const stockBadge = (p: Product) => {
-    const status = getStockStatus(p.stock)
+    const status = getStockStatus(p.quantity)
     return <Badge variant={status === 'ok' ? 'green' : status === 'low' ? 'yellow' : 'red'}>
       {status === 'empty' ? 'Esgotado' : status === 'low' ? 'Baixo' : 'OK'}
     </Badge>
@@ -41,7 +41,6 @@ export function Stock({ products, onAdjust }: StockProps) {
           <thead>
             <tr>
               <th style={thStyle}>Produto</th>
-              <th style={thStyle}>Categoria</th>
               <th style={thStyle}>Preço</th>
               <th style={thStyle}>Estoque</th>
               <th style={thStyle}>Status</th>
@@ -52,14 +51,11 @@ export function Stock({ products, onAdjust }: StockProps) {
             {sorted.map(p => (
               <tr key={p.id}>
                 <td style={tdStyle}>
-                  <strong>{p.image} {p.name}</strong>
+                  <strong>{p.name}</strong>
                   <div style={{ color: 'var(--text2)', fontSize: 12, marginTop: 2 }}>{p.description}</div>
                 </td>
-                <td style={tdStyle}>
-                  <span style={{ fontSize: 11, color: 'var(--text2)', background: 'var(--surface2)', padding: '2px 8px', borderRadius: 4 }}>{p.category}</span>
-                </td>
                 <td style={{ ...tdStyle, fontFamily: "'Playfair Display', serif", color: 'var(--accent)', fontWeight: 700 }}>{fmt(p.price)}</td>
-                <td style={{ ...tdStyle, fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700 }}>{p.stock}</td>
+                <td style={{ ...tdStyle, fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 700 }}>{p.quantity}</td>
                 <td style={tdStyle}>{stockBadge(p)}</td>
                 <td style={tdStyle}>
                   <Button variant="ghost" onClick={() => { setAdjustingId(p.id); setDelta('') }} style={{ fontSize: 12.5 }}>
@@ -75,14 +71,14 @@ export function Stock({ products, onAdjust }: StockProps) {
       {adjustingId && adjustingProduct && (
         <Modal title="Ajustar Estoque" onClose={() => setAdjustingId(null)} width={360}>
           <p style={{ color: 'var(--text2)', fontSize: 14, marginBottom: 20 }}>
-            <strong>{adjustingProduct.name}</strong> — atual: <strong>{adjustingProduct.stock} un.</strong>
+            <strong>{adjustingProduct.name}</strong> — atual: <strong>{adjustingProduct.quantity} un.</strong>
           </p>
           <FormField label="Quantidade (use negativo para subtrair)">
             <Input type="number" value={delta} onChange={e => setDelta(e.target.value)} placeholder="Ex: +3 ou -1" autoFocus />
           </FormField>
           {delta && !isNaN(Number(delta)) && (
             <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: -8, marginBottom: 16 }}>
-              Novo estoque: {Math.max(0, adjustingProduct.stock + Number(delta))} un.
+              Novo estoque: {Math.max(0, adjustingProduct.quantity + Number(delta))} un.
             </p>
           )}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
