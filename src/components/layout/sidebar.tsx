@@ -11,9 +11,10 @@ const NAV_ITEMS: NavItem[] = [
 interface SidebarProps {
   activePage: Page
   onNavigate: (page: Page) => void
+  onSignOut: () => void
 }
 
-export function Sidebar({ activePage, onNavigate }: SidebarProps) {
+export function Sidebar({ activePage, onNavigate, onSignOut }: SidebarProps) {
   return (
     <aside style={{
       width: 220, minHeight: '100vh', background: 'var(--text)',
@@ -51,8 +52,13 @@ export function Sidebar({ activePage, onNavigate }: SidebarProps) {
         ))}
       </nav>
 
-      <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-        <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 11.5 }}>© 2026 — Família 🤍</p>
+      <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <button
+          onClick={onSignOut}
+          style={{ width: '100%', padding: '9px 14px', border: 'none', borderRadius: 8, background: 'transparent', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, textAlign: 'left' }}
+        >
+          🚪 Sair
+        </button>
       </div>
     </aside>
   )
