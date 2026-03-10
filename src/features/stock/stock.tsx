@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Product } from '../../types'
 import { fmt, getStockStatus } from '../../lib/utils'
 import { Badge, Button, Modal, FormField, Input, PageHeader } from '../../components/ui'
@@ -8,19 +8,35 @@ interface StockProps {
   onAdjust: (id: number, delta: number) => void
 }
 
+const thStyle = { background: 'var(--surface2)', padding: '11px 20px', textAlign: 'left' as const, fontSize: 11, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase' as const, letterSpacing: '0.7px' }
+const tdStyle = { padding: '14px 20px', borderBottom: '1px solid var(--border)', fontSize: 13.5, verticalAlign: 'middle' as const }
+
+
 export function Stock({ products, onAdjust }: StockProps) {
   const [adjustingId, setAdjustingId] = useState<number | null>(null)
   const [delta, setDelta] = useState('')
 
   const adjustingProduct = products.find(p => p.id === adjustingId)
-  const sorted = [...products].sort((a, b) => a.quantity - b.quantity)
+  const sorted = useMemo(() =>
+    [...products].sort((a, b) => a.quantity - b.quantity),
+    [products]);
+
 
   const handleConfirm = () => {
-    if (!adjustingId || !delta) return
-    onAdjust(adjustingId, Number(delta))
+    const numericDelta = Number(delta)
+
+    if (!adjustingId || !adjustingProduct || isNaN(numericDelta) || numericDelta === 0) return
+
+    // Limita a redução para não ficar abaixo de 0 real
+    const maxReducao = -adjustingProduct.quantity
+    const deltaSeguro = numericDelta < maxReducao ? maxReducao : numericDelta
+
+    onAdjust(adjustingId, deltaSeguro)
+
     setAdjustingId(null)
     setDelta('')
   }
+
 
   const stockBadge = (p: Product) => {
     const status = getStockStatus(p.quantity)
@@ -28,9 +44,6 @@ export function Stock({ products, onAdjust }: StockProps) {
       {status === 'empty' ? 'Esgotado' : status === 'low' ? 'Baixo' : 'OK'}
     </Badge>
   }
-
-  const thStyle = { background: 'var(--surface2)', padding: '11px 20px', textAlign: 'left' as const, fontSize: 11, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase' as const, letterSpacing: '0.7px' }
-  const tdStyle = { padding: '14px 20px', borderBottom: '1px solid var(--border)', fontSize: 13.5, verticalAlign: 'middle' as const }
 
   return (
     <div>

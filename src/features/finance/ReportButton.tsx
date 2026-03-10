@@ -1,18 +1,17 @@
-import { useState } from 'react'
-import type { Sale, Product } from '../../types'
 import { Button } from '../../components/ui'
 import { generateMonthlyReport } from '../../lib/generateReport'
+import type { Product, Sale } from '../../types'
 
 interface ReportButtonProps {
     sales: Sale[]
     products: Product[]
+    month: number
+    setMonth: (month: number) => void
+    year: number
+    setYear: (year: number) => void
 }
 
-export function ReportButton({ sales, products }: ReportButtonProps) {
-    const now = new Date()
-    const [month, setMonth] = useState(now.getMonth() + 1)
-    const [year, setYear] = useState(now.getFullYear())
-
+export function ReportButton({ sales, products, month, setMonth, year, setYear }: ReportButtonProps) {
     const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
     const handleGenerate = () => {

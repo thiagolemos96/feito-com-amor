@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Product, Sale } from '../../types'
 import { fmt } from '../../lib/utils'
 import { StatCard } from '../../components/ui'
@@ -9,12 +10,21 @@ interface FinanceProps {
 }
 
 export function Finance({ sales, products }: FinanceProps) {
-  const totalRevenue = sales.reduce((a, s) => a + s.total, 0)
-  const avgSale = sales.length ? totalRevenue / sales.length : 0
+  const now = new Date()
+  const [month, setMonth] = useState(now.getMonth() + 1)
+  const [year, setYear] = useState(now.getFullYear())
+
+  const filteredSales = sales.filter(s => {
+    const [y, m] = s.date.split('-').map(Number)
+    return y === year && m === month
+  })
+
+  const totalRevenue = filteredSales.reduce((a, s) => a + s.total, 0)
+  const avgSale = filteredSales.length ? totalRevenue / filteredSales.length : 0
 
   const bestProduct = (() => {
     const totals: Record<number, number> = {}
-    sales.forEach(s => s.items.forEach(it => {
+    filteredSales.forEach(s => s.items.forEach(it => {
       totals[it.productId] = (totals[it.productId] || 0) + it.qty * it.unitPrice
     }))
     const best = Object.entries(totals).sort((a, b) => Number(b[1]) - Number(a[1]))[0]
@@ -22,12 +32,12 @@ export function Finance({ sales, products }: FinanceProps) {
   })()
 
   const byDate: Record<string, number> = {}
-  sales.forEach(s => { byDate[s.date] = (byDate[s.date] || 0) + s.total })
+  filteredSales.forEach(s => { byDate[s.date] = (byDate[s.date] || 0) + s.total })
   const dateEntries = Object.entries(byDate).sort((a, b) => a[0].localeCompare(b[0]))
   const maxDate = Math.max(...dateEntries.map(d => d[1]), 1)
 
   const bySeller: Record<string, number> = {}
-  sales.forEach(s => {
+  filteredSales.forEach(s => {
     bySeller[s.seller] = (bySeller[s.seller] || 0) + s.total
   })
   const sellerEntries = Object.entries(bySeller).sort((a, b) => b[1] - a[1])
@@ -54,11 +64,18 @@ export function Finance({ sales, products }: FinanceProps) {
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700 }}>Financeiro</h2>
           <p style={{ color: 'var(--text2)', fontSize: 14, marginTop: 4 }}>Resumo das receitas da loja</p>
         </div>
-        <ReportButton sales={sales} products={products} />
+        <ReportButton
+          sales={sales}
+          products={products}
+          month={month}
+          year={year}
+          setMonth={setMonth}
+          setYear={setYear}
+        />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
-        <StatCard label="Receita Total" value={fmt(totalRevenue)} sub={`${sales.length} vendas`} accent="green" />
+        <StatCard label="Receita Total" value={fmt(totalRevenue)} sub={`${filteredSales.length} vendas`} accent="green" />
         <StatCard label="Ticket Médio" value={fmt(avgSale)} sub="por venda" />
         <StatCard label="Mais Vendido" value={bestProduct?.name ?? '—'} accent="yellow" />
         <StatCard label="Produtos Ativos" value={String(products.filter(p => p.quantity > 0).length)} sub="em estoque" />
