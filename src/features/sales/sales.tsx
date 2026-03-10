@@ -21,6 +21,22 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
   const [notes, setNotes] = useState('')
   const [seller, setSeller] = useState('')
 
+  const now = new Date()
+  const [month, setMonth] = useState(now.getMonth() + 1)
+  const [year, setYear] = useState(now.getFullYear())
+  const [day, setDay] = useState(0)
+
+  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+  const daysInMonth = new Date(year, month, 0).getDate()
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+
+  const filteredSales = sales.filter(s => {
+    const [y, m, d] = s.date.split('-').map(Number)
+    if (y !== year || m !== month) return false
+    if (day !== 0 && d !== day) return false
+    return true
+  })
+
   const getProduct = (id: string) => products.find(p => p.id === Number(id))
 
   const saleTotal = items.reduce((acc, it) => {
@@ -56,12 +72,30 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
 
   const thStyle = { background: 'var(--surface2)', padding: '11px 20px', textAlign: 'left' as const, fontSize: 11, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase' as const, letterSpacing: '0.7px' }
   const tdStyle = { padding: '14px 20px', borderBottom: '1px solid var(--border)', fontSize: 13.5, verticalAlign: 'middle' as const }
+  const inputStyle: React.CSSProperties = {
+    padding: '8px 12px', border: '1px solid var(--border)', borderRadius: 8,
+    fontFamily: "'DM Sans', sans-serif", fontSize: 13.5,
+    background: 'var(--bg)', color: 'var(--text)', outline: 'none',
+  }
 
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
-        <PageHeader title="Vendas" subtitle={`${sales.length} vendas registradas`} />
-        <Button variant="primary" onClick={() => setShowModal(true)}>+ Registrar Venda</Button>
+        <PageHeader title="Vendas" subtitle={`${filteredSales.length} vendas exibidas`} />
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <select value={day} onChange={e => setDay(Number(e.target.value))} style={inputStyle}>
+            <option value={0}>Todos os dias</option>
+            {days.map(d => <option key={d} value={d}>{String(d).padStart(2, '0')}</option>)}
+          </select>
+          <select value={month} onChange={e => { setMonth(Number(e.target.value)); setDay(0); }} style={inputStyle}>
+            {monthNames.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+          </select>
+          <select value={year} onChange={e => setYear(Number(e.target.value))} style={inputStyle}>
+            {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <Button variant="primary" onClick={() => setShowModal(true)}>+ Registrar Venda</Button>
+        </div>
       </div>
 
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
@@ -77,7 +111,7 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
             </tr>
           </thead>
           <tbody>
-            {sales.map(s => (
+            {filteredSales.map(s => (
               <tr key={s.id}>
                 <td style={{ ...tdStyle, color: 'var(--text2)', fontSize: 12 }}>#{String(s.id).slice(-4)}</td>
                 <td style={{ ...tdStyle, color: 'var(--text2)' }}>{formatDate(s.date)}</td>

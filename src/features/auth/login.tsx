@@ -27,7 +27,7 @@ export function Login({ onLogin }: LoginProps) {
         <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 40, width: 380 }}>
                 <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, marginBottom: 4 }}>
-                    Ateliê<span style={{ color: 'var(--accent)' }}>.</span>
+                    Feito com Amor
                 </h1>
                 <p style={{ color: 'var(--text2)', fontSize: 14, marginBottom: 32 }}>Gestão de Artesanato</p>
 

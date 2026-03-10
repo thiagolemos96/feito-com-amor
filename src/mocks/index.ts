@@ -2,7 +2,7 @@ import type { Product, Sale } from '../types'
 
 export const mockProducts: Product[] = [
   { id: 1, name: 'Quadro Floral', description: 'Madeira pintada à mão, 30x40cm', price: 85.0, quantity: 4, image: '🌸' },
-  { id: 2, name: 'Porta Retrato Rústico', description: 'Pinho natural, 15x20cm', price: 45.0, quantity: 7, image: '🪵' },
+  { id: 2, name: 'Porta Retrato Rústico', description: 'Pinho natural, 15x20cm', price: 45.0, quantity: 7, image: '📷' },
   { id: 3, name: 'Enfeite de Jardim', description: 'Cogumelo de madeira pintado', price: 32.0, quantity: 2, image: '🍄' },
   { id: 4, name: 'Colar Artesanal', description: 'Miçangas coloridas feitas à mão', price: 28.0, quantity: 5, image: '📿' },
   { id: 5, name: 'Plaquinha Bem-Vindo', description: 'MDF com letras pintadas', price: 55.0, quantity: 3, image: '🏡' },

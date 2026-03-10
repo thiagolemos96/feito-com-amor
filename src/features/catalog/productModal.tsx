@@ -5,7 +5,7 @@ import { useUpload } from '../../hooks/useUpload'
 
 type ProductFormData = Omit<Product, 'id'>
 interface ProductModalProps { product?: Product | null; onSave: (data: ProductFormData) => void; onClose: () => void }
-const EMPTY: ProductFormData = { name: '', description: '', price: 0, quantity: 0, image: '🪵' }
+const EMPTY: ProductFormData = { name: '', description: '', price: 0, quantity: 0, image: '📷' }
 
 export function ProductModal({ product, onSave, onClose }: ProductModalProps) {
   const [form, setForm] = useState<ProductFormData>(EMPTY)
@@ -48,17 +48,17 @@ export function ProductModal({ product, onSave, onClose }: ProductModalProps) {
       </div>
 
       <FormField label="Emoji (se não tiver foto)">
-        <Input value={form.image.startsWith('http') ? '📷' : form.image} onChange={e => { set('image', e.target.value); setPreview(null) }} maxLength={2} style={{ fontSize: 24, textAlign: 'center' }} disabled={form.image.startsWith('http')} />
+        <Input value={form.image.startsWith('http') ? '📷' : form.image} onChange={e => { set('image', e.target.value); setPreview(null) }} maxLength={2} style={{ fontSize: 24, textAlign: 'center', width: '100%', border: '1px solid var(--border)', borderRadius: 8, fontFamily: 'DM Sans, sans-serif', background: 'var(--bg)', color: 'var(--text)', outline: 'none' }} disabled={form.image.startsWith('http')} />
       </FormField>
 
       <FormField label="Foto do produto (opcional)">
-        <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', border: '1px dashed var(--border)', borderRadius: 8, cursor: 'pointer', color: 'var(--text2)', fontSize: 13.5 }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0px 10px 14px', border: '1px dashed var(--border)', borderRadius: 8, cursor: 'pointer', color: 'var(--text2)', fontSize: 13.5 }}>
           <span>📁</span>
           <span>{uploading ? 'Enviando...' : 'Clique para selecionar uma foto'}</span>
           <input type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} disabled={uploading} />
         </label>
         {preview && (
-          <button onClick={() => { setPreview(null); set('image', '🪵') }} style={{ marginTop: 6, fontSize: 12, color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer' }}>
+          <button onClick={() => { setPreview(null); set('image', '📷') }} style={{ marginTop: 6, fontSize: 12, color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer' }}>
             ✕ Remover foto
           </button>
         )}

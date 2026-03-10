@@ -47,7 +47,7 @@ export function generateMonthlyReport({ sales, products, month, year }: ReportOp
     doc.setTextColor(250, 247, 242)
     doc.setFontSize(22)
     doc.setFont('helvetica', 'bold')
-    doc.text('Ateliê.', 14, 18)
+    doc.text('Feito com Amor', 14, 18)
 
     doc.setFontSize(11)
     doc.setFont('helvetica', 'normal')
@@ -146,7 +146,7 @@ export function generateMonthlyReport({ sales, products, month, year }: ReportOp
     doc.setTextColor(100, 90, 75)
     doc.setFontSize(8)
     doc.setFont('helvetica', 'normal')
-    doc.text('Ateliê — Gestão de Artesanato', pageW / 2, pageH - 4, { align: 'center' })
+    doc.text('Feito com Amor — Gestão de Artesanato', pageW / 2, pageH - 4, { align: 'center' })
 
     // ─── SALVA ────────────────────────────────────────────────────
     doc.save(`relatorio-${monthLabel.toLowerCase().replace(' ', '-')}.pdf`)
