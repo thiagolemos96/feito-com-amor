@@ -15,7 +15,7 @@ import './index.css'
 export default function App() {
   const [page, setPage] = useState<Page>('dashboard')
   const { session, loading, signIn, signOut } = useAuth()
-  const { products, addProduct, updateProduct, removeProduct, adjustStock, decrementStock } = useProducts()
+  const { products, addProduct, updateProduct, removeProduct, adjustStock } = useProducts()
   const { sales, addSale } = useSales()
 
   const handleAddSale = (items: Parameters<typeof addSale>[0], notes: string, seller: string) => {
