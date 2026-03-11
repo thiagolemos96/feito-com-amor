@@ -4,6 +4,13 @@ export const fmt = (value: number): string =>
 export const formatDate = (dateStr: string): string =>
   dateStr.split('-').reverse().join('/')
 
+export const formatFullDate = (dateStr: string): string => {
+  const [year, month, day] = dateStr.split('-')
+  const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+  const formatted = date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1)
+}
+
 export const today = (): string =>
   new Date().toISOString().split('T')[0]
 
