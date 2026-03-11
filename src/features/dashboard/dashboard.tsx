@@ -1,5 +1,5 @@
 import type { Product, Sale } from '../../types'
-import { fmt, formatDate } from '../../lib/utils'
+import { fmt, formatDate, formatFullDate } from '../../lib/utils'
 import { StatCard, TableCard, Badge, PageHeader } from '../../components/ui'
 
 interface DashboardProps {
@@ -8,7 +8,7 @@ interface DashboardProps {
 }
 
 export function Dashboard({ products, sales }: DashboardProps) {
-  const TODAY = '2026-03-07'
+  const TODAY = new Date().toISOString().split('T')[0]
   const todaySales = sales.filter(s => s.date === TODAY)
   const todayRevenue = todaySales.reduce((a, s) => a + s.total, 0)
   const weekRevenue = sales.reduce((a, s) => a + s.total, 0)
@@ -17,7 +17,7 @@ export function Dashboard({ products, sales }: DashboardProps) {
 
   return (
     <div>
-      <PageHeader title="Visão Geral" subtitle="Sexta-feira, 7 de março de 2026" />
+      <PageHeader title="Visão Geral" subtitle={formatFullDate(TODAY)} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
         <StatCard label="Vendas Hoje" value={fmt(todayRevenue)} sub={`${todaySales.length} venda(s)`} accent="green" />
