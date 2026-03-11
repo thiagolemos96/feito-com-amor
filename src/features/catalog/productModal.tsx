@@ -39,7 +39,7 @@ export function ProductModal({ product, onSave, onClose }: ProductModalProps) {
   }
 
   return (
-    <Modal title={product ? 'Editar Produto' : 'Novo Produto'} onClose={onClose}>
+    <Modal title={product ? 'Editar Produto' : 'Novo Produto'} onClose={onClose} disableOutsideClick>
       <div style={{ textAlign: 'center', marginBottom: 20 }}>
         {preview
           ? <img src={preview} alt="preview" style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 12, border: '1px solid var(--border)' }} />
