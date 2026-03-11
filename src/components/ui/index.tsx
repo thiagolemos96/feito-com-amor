@@ -98,12 +98,13 @@ interface ModalProps {
   onClose: () => void
   children: ReactNode
   width?: number
+  disableOutsideClick?: boolean
 }
 
-export function Modal({ title, onClose, children, width = 520 }: ModalProps) {
+export function Modal({ title, onClose, children, width = 520, disableOutsideClick }: ModalProps) {
   return (
     <div
-      onClick={onClose}
+      onClick={disableOutsideClick ? undefined : onClose}
       style={{
         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -115,9 +116,22 @@ export function Modal({ title, onClose, children, width = 520 }: ModalProps) {
         style={{
           background: 'var(--surface)', borderRadius: 16, padding: 32,
           width, maxHeight: '90vh', overflowY: 'auto',
+          position: 'relative',
         }}
       >
-        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, marginBottom: 24 }}>{title}</h3>
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute', top: 24, right: 24,
+            background: 'none', border: 'none',
+            fontSize: 20, cursor: 'pointer', color: 'var(--text2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}
+          title="Fechar"
+        >
+          ✕
+        </button>
+        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, marginBottom: 24, paddingRight: 32 }}>{title}</h3>
         {children}
       </div>
     </div>
