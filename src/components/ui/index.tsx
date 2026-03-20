@@ -68,17 +68,16 @@ interface StatCardProps {
   accent?: AccentColor
 }
 
-const accentBar: Record<AccentColor, string> = {
-  default: 'bg-accent',
-  green: 'bg-success',
-  yellow: 'bg-warning',
-  red: 'bg-danger',
+const accentHover: Record<AccentColor, string> = {
+  default: 'hover:border-accent',
+  green: 'hover:border-success',
+  yellow: 'hover:border-warning',
+  red: 'hover:border-danger',
 }
 
 export function StatCard({ label, value, sub, accent = 'default' }: StatCardProps) {
   return (
-    <div className="bg-surface border border-border rounded-[14px] p-[22px] relative overflow-hidden">
-      <div className={`absolute top-0 left-0 right-0 h-[3px] ${accentBar[accent]}`} />
+    <div className={`bg-surface border-2 border-border rounded-[14px] p-[22px] transition-colors duration-150 ${accentHover[accent]}`}>
       <div className="text-[12px] text-muted font-semibold">{label}</div>
       <div className="font-body text-2xl font-bold mt-2 text-text">{value}</div>
       {sub && <div className="text-[12px] text-muted mt-1">{sub}</div>}
@@ -167,7 +166,14 @@ export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
 }
 
 export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select className={inputClass} {...props} />
+  return (
+    <div className="relative">
+      <select className={`${inputClass} appearance-none pr-9 cursor-pointer`} {...props} />
+      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted">
+        <ion-icon name="chevron-down-outline" style={{ fontSize: 14 }} />
+      </span>
+    </div>
+  )
 }
 
 export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {

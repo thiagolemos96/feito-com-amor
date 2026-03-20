@@ -72,7 +72,7 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
 
   const thClass = 'bg-surface2 px-3 sm:px-5 py-[11px] text-left text-[12px] font-semibold text-muted'
   const tdClass = 'px-3 sm:px-5 py-[12px] border-b border-border text-[13px] align-middle'
-  const filterSelectClass = 'px-3 py-2 border border-border rounded-lg font-body text-[13.5px] bg-surface text-text outline-none'
+  const filterSelectClass = 'px-3 py-2 pr-8 border border-border rounded-lg font-body text-[13.5px] bg-surface text-text outline-none appearance-none cursor-pointer'
 
   return (
     <div>
@@ -82,16 +82,25 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
           <Button variant="primary" onClick={() => setShowModal(true)} style={{ flexShrink: 0 }}>+ Registrar Venda</Button>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <select value={day} onChange={e => setDay(Number(e.target.value))} className={filterSelectClass}>
-            <option value={0}>Todos os dias</option>
-            {days.map(d => <option key={d} value={d}>{String(d).padStart(2, '0')}</option>)}
-          </select>
-          <select value={month} onChange={e => { setMonth(Number(e.target.value)); setDay(0) }} className={filterSelectClass}>
-            {monthNames.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
-          </select>
-          <select value={year} onChange={e => setYear(Number(e.target.value))} className={filterSelectClass}>
-            {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
+          <div className="relative">
+            <select value={day} onChange={e => setDay(Number(e.target.value))} className={filterSelectClass}>
+              <option value={0}>Todos os dias</option>
+              {days.map(d => <option key={d} value={d}>{String(d).padStart(2, '0')}</option>)}
+            </select>
+            <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted"><ion-icon name="chevron-down-outline" style={{ fontSize: 13 }} /></span>
+          </div>
+          <div className="relative">
+            <select value={month} onChange={e => { setMonth(Number(e.target.value)); setDay(0) }} className={filterSelectClass}>
+              {monthNames.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+            </select>
+            <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted"><ion-icon name="chevron-down-outline" style={{ fontSize: 13 }} /></span>
+          </div>
+          <div className="relative">
+            <select value={year} onChange={e => setYear(Number(e.target.value))} className={filterSelectClass}>
+              {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
+            </select>
+            <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-muted"><ion-icon name="chevron-down-outline" style={{ fontSize: 13 }} /></span>
+          </div>
         </div>
       </div>
 
