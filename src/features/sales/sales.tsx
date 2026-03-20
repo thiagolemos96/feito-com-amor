@@ -70,67 +70,64 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
 
   const getProductName = (id: number) => products.find(p => p.id === id)?.name ?? '?'
 
-  const thStyle = { background: 'var(--surface2)', padding: '11px 20px', textAlign: 'left' as const, fontSize: 11, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase' as const, letterSpacing: '0.7px' }
-  const tdStyle = { padding: '14px 20px', borderBottom: '1px solid var(--border)', fontSize: 13.5, verticalAlign: 'middle' as const }
-  const inputStyle: React.CSSProperties = {
-    padding: '8px 12px', border: '1px solid var(--border)', borderRadius: 8,
-    fontFamily: "'DM Sans', sans-serif", fontSize: 13.5,
-    background: 'var(--bg)', color: 'var(--text)', outline: 'none',
-  }
+  const thClass = 'bg-surface2 px-5 py-[11px] text-left text-[12px] font-semibold text-muted'
+  const tdClass = 'px-5 py-[14px] border-b border-border text-[13.5px] align-middle'
+  const filterSelectClass = 'px-3 py-2 border border-border rounded-lg font-body text-[13.5px] bg-surface text-text outline-none'
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+      <div className="flex items-start justify-between flex-wrap gap-4 mb-8">
         <PageHeader title="Vendas" subtitle={`${filteredSales.length} vendas exibidas`} />
-        
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <select value={day} onChange={e => setDay(Number(e.target.value))} style={inputStyle}>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <select value={day} onChange={e => setDay(Number(e.target.value))} className={filterSelectClass}>
             <option value={0}>Todos os dias</option>
             {days.map(d => <option key={d} value={d}>{String(d).padStart(2, '0')}</option>)}
           </select>
-          <select value={month} onChange={e => { setMonth(Number(e.target.value)); setDay(0); }} style={inputStyle}>
+          <select value={month} onChange={e => { setMonth(Number(e.target.value)); setDay(0) }} className={filterSelectClass}>
             {monthNames.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
           </select>
-          <select value={year} onChange={e => setYear(Number(e.target.value))} style={inputStyle}>
+          <select value={year} onChange={e => setYear(Number(e.target.value))} className={filterSelectClass}>
             {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
           </select>
           <Button variant="primary" onClick={() => setShowModal(true)}>+ Registrar Venda</Button>
         </div>
       </div>
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th style={thStyle}>#</th>
-              <th style={thStyle}>Data</th>
-              <th style={thStyle}>Vendedor</th>
-              <th style={thStyle}>Produtos</th>
-              <th style={thStyle}>Total</th>
-              <th style={thStyle}>Obs.</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredSales.map(s => (
-              <tr key={s.id}>
-                <td style={{ ...tdStyle, color: 'var(--text2)', fontSize: 12 }}>#{String(s.id).slice(-4)}</td>
-                <td style={{ ...tdStyle, color: 'var(--text2)' }}>{formatDate(s.date)}</td>
-                <td style={{ ...tdStyle, color: 'var(--text2)' }}>{s.seller || '—'}</td>
-                <td style={{ ...tdStyle, fontSize: 13 }}>{s.items.map(it => `${it.qty}x ${getProductName(it.productId)}`).join(', ')}</td>
-                <td style={tdStyle}>
-                  <strong style={{ fontFamily: "'Playfair Display', serif", color: 'var(--accent)', fontSize: 16 }}>{fmt(s.total)}</strong>
-                </td>
-                <td style={{ ...tdStyle, color: 'var(--text2)', fontSize: 12.5 }}>{s.notes || '—'}</td>
+      <div className="bg-surface border border-border rounded-[14px] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse" style={{ minWidth: 680 }}>
+            <thead>
+              <tr>
+                <th className={thClass}>#</th>
+                <th className={thClass}>Data</th>
+                <th className={thClass}>Vendedor</th>
+                <th className={thClass}>Produtos</th>
+                <th className={thClass}>Total</th>
+                <th className={thClass}>Obs.</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredSales.map(s => (
+                <tr key={s.id}>
+                  <td className={`${tdClass} text-muted text-[12px]`}>#{String(s.id).slice(-4)}</td>
+                  <td className={`${tdClass} text-muted`}>{formatDate(s.date)}</td>
+                  <td className={`${tdClass} text-muted`}>{s.seller || '—'}</td>
+                  <td className={`${tdClass} text-[13px]`}>{s.items.map(it => `${it.qty}x ${getProductName(it.productId)}`).join(', ')}</td>
+                  <td className={tdClass}>
+                    <strong className="font-body font-bold text-accent text-[15px]">{fmt(s.total)}</strong>
+                  </td>
+                  <td className={`${tdClass} text-muted text-[12.5px]`}>{s.notes || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showModal && (
         <Modal title="Nova Venda" onClose={() => setShowModal(false)}>
           {items.map((it, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 10, background: 'var(--surface2)', borderRadius: 8, marginBottom: 8 }}>
+            <div key={i} className="flex items-center gap-2.5 p-2.5 bg-surface2 rounded-lg mb-2">
               <Select value={it.productId} onChange={e => updateItem(i, 'productId', e.target.value)} style={{ flex: 1 }}>
                 <option value="">Selecionar produto...</option>
                 {products.filter(p => p.quantity > 0).map(p => (
@@ -147,7 +144,7 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
           <Button variant="ghost" onClick={addItem} style={{ fontSize: 13, marginBottom: 16 }}>+ Adicionar item</Button>
 
           <FormField label="Vendedor">
-            <Select value={seller} onChange={e => setSeller(e.target.value)} style={{ flex: 1 }}>
+            <Select value={seller} onChange={e => setSeller(e.target.value)}>
               <option value="">Selecione quem realizou a venda...</option>
               {SELLERS.map(s => <option key={s} value={s}>{s}</option>)}
             </Select>
@@ -157,11 +154,11 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
             <Input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Ex: cliente pediu embrulho..." />
           </FormField>
 
-          <div style={{ textAlign: 'right', paddingTop: 12, borderTop: '1px solid var(--border)', fontFamily: "'Playfair Display', serif", fontSize: 20, color: 'var(--accent)', marginBottom: 8 }}>
+          <div className="text-right pt-3 border-t border-border font-body font-bold text-[20px] text-accent mb-2">
             Total: {fmt(saleTotal)}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
+          <div className="flex justify-end gap-2.5 mt-4">
             <Button variant="ghost" onClick={() => setShowModal(false)}>Cancelar</Button>
             <Button variant="primary" onClick={handleSave}>Confirmar Venda</Button>
           </div>

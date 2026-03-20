@@ -16,7 +16,7 @@ const fetchSales = async (): Promise<Sale[]> => {
     total: s.total,
     notes: s.notes ?? '',
     seller: s.seller,
-    items: s.sale_items.map((it: any) => ({
+    items: (s.sale_items as { product_id: number; quantity: number; unit_price: number }[]).map(it => ({
       productId: it.product_id,
       qty: it.quantity,
       unitPrice: it.unit_price,

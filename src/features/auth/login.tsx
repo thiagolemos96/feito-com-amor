@@ -24,12 +24,12 @@ export function Login({ onLogin }: LoginProps) {
     }
 
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, padding: 40, width: 380 }}>
-                <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700, marginBottom: 4 }}>
+        <div className="min-h-screen bg-bg flex items-center justify-center p-4">
+            <div className="bg-surface border border-border rounded-2xl p-10 w-full max-w-sm">
+                <h1 className="font-display text-[28px] font-bold text-text mb-1">
                     Feito com Amor
                 </h1>
-                <p style={{ color: 'var(--text2)', fontSize: 14, marginBottom: 32 }}>Gestão de Artesanato</p>
+                <p className="text-muted text-[14px] mb-8">Gestão de Artesanato</p>
 
                 <FormField label="Email">
                     <Input
@@ -51,10 +51,15 @@ export function Login({ onLogin }: LoginProps) {
                 </FormField>
 
                 {error && (
-                    <p style={{ color: 'var(--red)', fontSize: 13, marginBottom: 16 }}>{error}</p>
+                    <p className="text-danger text-[13px] mb-4">{error}</p>
                 )}
 
-                <Button variant="primary" onClick={handleSubmit} disabled={loading} style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}>
+                <Button
+                    variant="primary"
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}
+                >
                     {loading ? 'Entrando...' : 'Entrar'}
                 </Button>
             </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Page } from './types'
 import { useAuth } from './hooks/useAuth'
 import { useProducts } from './hooks/useProducts'
@@ -18,6 +18,25 @@ export default function App() {
   const { products, addProduct, updateProduct, removeProduct, adjustStock } = useProducts()
   const { sales, addSale } = useSales()
 
+  const [theme, setTheme] = useState<'light' | 'dark'>(() =>
+    (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
+  )
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+
+  const toggleTheme = () => setTheme(t => t === 'light' ? 'dark' : 'light')
+
   const handleAddSale = (items: Parameters<typeof addSale>[0], notes: string, seller: string) => {
     addSale(items, notes, seller)
   }
@@ -27,10 +46,50 @@ export default function App() {
   if (!session) return <Login onLogin={signIn} />
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <Sidebar activePage={page} onNavigate={setPage} onSignOut={signOut} />
+    <div className="flex min-h-screen bg-bg">
+      {isMobile && sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/50 z-[149] backdrop-blur-sm"
+        />
+      )}
 
-      <main style={{ marginLeft: 220, flex: 1, padding: '36px 40px', maxWidth: 'calc(100vw - 220px)' }}>
+      {isMobile && (
+        <header className="fixed top-0 left-0 right-0 h-14 bg-surface border-b border-border flex items-center justify-between px-5 z-[99]">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 text-text flex items-center"
+            aria-label="Abrir menu"
+          >
+            <ion-icon name="menu-outline" style={{ fontSize: 24 }} />
+          </button>
+          <span className="font-display text-[17px] font-bold text-text">Feito Com Amor</span>
+          <button
+            onClick={toggleTheme}
+            className="p-2 text-muted flex items-center"
+            aria-label="Alternar tema"
+          >
+            <ion-icon name={theme === 'dark' ? 'sunny-outline' : 'moon-outline'} style={{ fontSize: 22 }} />
+          </button>
+        </header>
+      )}
+
+      <Sidebar
+        activePage={page}
+        onNavigate={(p) => { setPage(p); setSidebarOpen(false) }}
+        onSignOut={signOut}
+        isMobile={isMobile}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
+
+      <main className={
+        isMobile
+          ? 'ml-0 flex-1 pt-[72px] px-5 pb-6 min-h-screen'
+          : 'ml-[220px] flex-1 px-10 py-9 min-h-screen'
+      }>
         {page === 'dashboard' && <Dashboard products={products} sales={sales} />}
         {page === 'catalog' && <Catalog products={products} onAdd={addProduct} onUpdate={updateProduct} onRemove={removeProduct} />}
         {page === 'stock' && <Stock products={products} onAdjust={adjustStock} />}

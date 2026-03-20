@@ -21,37 +21,38 @@ const stockVariant = (stock: number) => {
 
 export function ProductCard({ product, onEdit, onRemove }: ProductCardProps) {
   return (
-    <div style={{
-      background: 'var(--surface)', border: '1px solid var(--border)',
-      borderRadius: 14, padding: 20, transition: 'box-shadow 0.15s',
-    }}>
-      <div style={{ marginBottom: 12 }}>
+    <div className="bg-surface border border-border rounded-[14px] p-5 flex flex-col gap-3 transition-shadow duration-150">
+      <div>
         {product.image.startsWith('http') ? (
           <img
             src={product.image}
             alt={product.name}
-            style={{ width: '100%', height: 140, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }}
+            className="w-full h-[140px] object-cover rounded-lg border border-border"
           />
         ) : (
-          <div style={{ fontSize: 36 }}>{product.image}</div>
+          <div className="text-[36px]">{product.image}</div>
         )}
       </div>
-      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, fontWeight: 600, marginBottom: 3 }}>{product.name}</div>
-      <div style={{ fontSize: 12.5, color: 'var(--text2)', marginBottom: 12, lineHeight: 1.4 }}>{product.description}</div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 12, borderTop: '1px solid var(--border)' }}>
-        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 700, color: 'var(--accent)' }}>
-          {fmt(product.price)}
-        </span>
-        <Badge variant={stockVariant(product.quantity)}>{stockLabel(product.quantity)}</Badge>
+      <div>
+        <div className="font-body font-semibold text-[15px] text-text mb-0.5">{product.name}</div>
+        <div className="text-[12.5px] text-muted leading-snug">{product.description}</div>
       </div>
 
-      <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
+      <div className="flex justify-between items-center pt-3 border-t border-border">
+        <span className="font-body font-bold text-[16px] text-accent">
+          {fmt(product.price)}
+        </span>
+        <Badge variant={stockVariant(product.quantity) as 'green' | 'yellow' | 'red'}>{stockLabel(product.quantity)}</Badge>
+      </div>
+
+      <div className="flex gap-1.5">
         <Button variant="ghost" onClick={() => onEdit(product)} style={{ flex: 1, fontSize: 12.5, padding: '7px 0', justifyContent: 'center' }}>
-          ✏️ Editar
+          <ion-icon name="pencil-outline" style={{ fontSize: 14 }} />
+          Editar
         </Button>
         <Button variant="danger" onClick={() => onRemove(product.id)} style={{ fontSize: 12.5, padding: '7px 12px' }}>
-          🗑
+          <ion-icon name="trash-outline" style={{ fontSize: 14 }} />
         </Button>
       </div>
     </div>

@@ -1,20 +1,49 @@
-:root {
-  --bg: #faf7f2;
-  --surface: #ffffff;
-  --surface2: #f3ede3;
-  --border: #e8dece;
-  --text: #2c2416;
-  --text2: #7a6a52;
-  --accent: #b5651d;
-  --accent2: #8b4513;
-  --green: #4a7c59;
-  --red: #c0392b;
-  --yellow: #e6a817;
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #faf7f2;
+  --color-surface: #ffffff;
+  --color-surface2: #f3ede3;
+  --color-border: #e8dece;
+  --color-text: #2c2416;
+  --color-muted: #7a6a52;
+  --color-accent: #b5651d;
+  --color-accent2: #8b4513;
+  --color-success: #4a7c59;
+  --color-danger: #c0392b;
+  --color-warning: #e6a817;
+  --color-sidebar: #2c2416;
+
+  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'Playfair Display', serif;
 }
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    min-height: 100vh;
+  }
+
+  [data-theme="dark"] {
+    --color-bg: #1a1410;
+    --color-surface: #231d17;
+    --color-surface2: #2e261e;
+    --color-border: #3d3228;
+    --color-text: #f0e8d8;
+    --color-muted: #a08060;
+    --color-accent: #c8763a;
+    --color-accent2: #a05525;
+    --color-success: #5a9a6e;
+    --color-danger: #d44f3d;
+    --color-warning: #f0b830;
+    --color-sidebar: #0f0c09;
+  }
 }

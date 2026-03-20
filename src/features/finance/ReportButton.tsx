@@ -18,22 +18,19 @@ export function ReportButton({ sales, products, month, setMonth, year, setYear }
         generateMonthlyReport({ sales, products, month, year })
     }
 
-    const inputStyle: React.CSSProperties = {
-        padding: '8px 12px', border: '1px solid var(--border)', borderRadius: 8,
-        fontFamily: "'DM Sans', sans-serif", fontSize: 13.5,
-        background: 'var(--bg)', color: 'var(--text)', outline: 'none',
-    }
+    const filterSelectClass = 'px-3 py-2 border border-border rounded-lg font-body text-[13.5px] bg-surface text-text outline-none'
 
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <select value={month} onChange={e => setMonth(Number(e.target.value))} style={inputStyle}>
+        <div className="flex items-center gap-2.5 flex-wrap">
+            <select value={month} onChange={e => setMonth(Number(e.target.value))} className={filterSelectClass}>
                 {monthNames.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
             </select>
-            <select value={year} onChange={e => setYear(Number(e.target.value))} style={inputStyle}>
+            <select value={year} onChange={e => setYear(Number(e.target.value))} className={filterSelectClass}>
                 {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
             </select>
             <Button variant="primary" onClick={handleGenerate}>
-                📄 Gerar PDF
+                <ion-icon name="document-outline" style={{ fontSize: 15 }} />
+                Gerar PDF
             </Button>
         </div>
     )

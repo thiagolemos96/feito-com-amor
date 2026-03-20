@@ -119,7 +119,7 @@ export function generateMonthlyReport({ sales, products, month, year }: ReportOp
             alternateRowStyles: { fillColor: [250, 247, 242] },
             columnStyles: { 2: { fontStyle: 'bold', textColor: [181, 101, 29] } },
         })
-        y = (doc as any).lastAutoTable.finalY + 12
+        y = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 12
     }
 
     // ─── TABELA DE RECEITA POR VENDEDOR ─────────────────────────

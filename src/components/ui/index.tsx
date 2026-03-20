@@ -8,20 +8,21 @@ interface BadgeProps {
   children: ReactNode
 }
 
-const badgeStyles: Record<BadgeVariant, string> = {
-  green: 'background:#e8f5ec;color:#2d6a40',
-  yellow: 'background:#fef9e7;color:#9a6e00',
-  red: 'background:#fdecea;color:#c0392b',
+const badgeDot: Record<BadgeVariant, string> = {
+  green: 'bg-success',
+  yellow: 'bg-warning',
+  red: 'bg-danger',
+}
+const badgeBg: Record<BadgeVariant, string> = {
+  green: 'bg-success/10 text-success',
+  yellow: 'bg-warning/15 text-warning',
+  red: 'bg-danger/10 text-danger',
 }
 
 export function Badge({ variant, children }: BadgeProps) {
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center',
-      padding: '3px 10px', borderRadius: 20,
-      fontSize: 11.5, fontWeight: 500,
-      ...Object.fromEntries(badgeStyles[variant].split(';').map(s => s.split(':'))),
-    }}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[12px] font-medium ${badgeBg[variant]}`}>
+      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${badgeDot[variant]}`} />
       {children}
     </span>
   )
@@ -38,21 +39,20 @@ interface ButtonProps {
   disabled?: boolean
 }
 
+const buttonVariants: Record<ButtonVariant, string> = {
+  primary: 'bg-accent text-white hover:bg-accent2',
+  ghost: 'bg-transparent text-muted border border-border hover:bg-surface2',
+  danger: 'bg-danger/10 text-danger border border-danger/20 hover:bg-danger/20',
+}
+
 export function Button({ variant = 'ghost', onClick, children, style, disabled }: ButtonProps) {
-  const base: React.CSSProperties = {
-    display: 'inline-flex', alignItems: 'center', gap: 7,
-    padding: '9px 18px', borderRadius: 8, border: 'none',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    fontFamily: "'DM Sans', sans-serif", fontSize: 13.5, fontWeight: 500,
-    transition: 'all 0.15s', opacity: disabled ? 0.5 : 1,
-  }
-  const variants: Record<ButtonVariant, React.CSSProperties> = {
-    primary: { background: 'var(--accent)', color: 'white' },
-    ghost: { background: 'transparent', color: 'var(--text2)', border: '1px solid var(--border)' },
-    danger: { background: '#fdecea', color: 'var(--red)', border: '1px solid #f5c6c2' },
-  }
   return (
-    <button style={{ ...base, ...variants[variant], ...style }} onClick={onClick} disabled={disabled}>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={style}
+      className={`inline-flex items-center gap-1.5 px-[18px] py-[9px] rounded-lg font-body text-[13.5px] font-medium transition-all duration-150 cursor-pointer border-none ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${buttonVariants[variant]}`}
+    >
       {children}
     </button>
   )
@@ -68,26 +68,43 @@ interface StatCardProps {
   accent?: AccentColor
 }
 
-const accentColors: Record<AccentColor, string> = {
-  default: 'var(--accent)',
-  green: 'var(--green)',
-  yellow: 'var(--yellow)',
-  red: 'var(--red)',
+const accentBar: Record<AccentColor, string> = {
+  default: 'bg-accent',
+  green: 'bg-success',
+  yellow: 'bg-warning',
+  red: 'bg-danger',
 }
 
 export function StatCard({ label, value, sub, accent = 'default' }: StatCardProps) {
   return (
-    <div style={{
-      background: 'var(--surface)', border: '1px solid var(--border)',
-      borderRadius: 14, padding: 22, position: 'relative', overflow: 'hidden',
-    }}>
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: 3,
-        background: accentColors[accent],
-      }} />
-      <div style={{ fontSize: 11.5, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 500 }}>{label}</div>
-      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, marginTop: 8, color: 'var(--text)' }}>{value}</div>
-      {sub && <div style={{ fontSize: 12, color: 'var(--text2)', marginTop: 4 }}>{sub}</div>}
+    <div className="bg-surface border border-border rounded-[14px] p-[22px] relative overflow-hidden">
+      <div className={`absolute top-0 left-0 right-0 h-[3px] ${accentBar[accent]}`} />
+      <div className="text-[12px] text-muted font-semibold">{label}</div>
+      <div className="font-body text-2xl font-bold mt-2 text-text">{value}</div>
+      {sub && <div className="text-[12px] text-muted mt-1">{sub}</div>}
+    </div>
+  )
+}
+
+// ─── HERO STAT CARD ───────────────────────────────────────────────
+interface HeroStatCardProps {
+  label: string
+  value: string
+  sub?: string
+}
+
+export function HeroStatCard({ label, value, sub }: HeroStatCardProps) {
+  return (
+    <div className="bg-accent rounded-[14px] p-8 relative overflow-hidden">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(255,255,255,0.10) 0%, transparent 60%)' }}
+      />
+      <div className="relative z-10">
+        <div className="text-[12px] text-white/70 font-semibold mb-2.5">{label}</div>
+        <div className="font-body text-[42px] font-extrabold text-white leading-none">{value}</div>
+        {sub && <div className="text-[13px] text-white/65 mt-2.5">{sub}</div>}
+      </div>
     </div>
   )
 }
@@ -105,33 +122,21 @@ export function Modal({ title, onClose, children, width = 520, disableOutsideCli
   return (
     <div
       onClick={disableOutsideClick ? undefined : onClose}
-      style={{
-        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        zIndex: 100, backdropFilter: 'blur(2px)',
-      }}
+      className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-[100] p-4"
     >
       <div
         onClick={e => e.stopPropagation()}
-        style={{
-          background: 'var(--surface)', borderRadius: 16, padding: 32,
-          width, maxHeight: '90vh', overflowY: 'auto',
-          position: 'relative',
-        }}
+        className="bg-surface rounded-[14px] p-8 max-h-[90vh] overflow-y-auto relative w-full"
+        style={{ maxWidth: width }}
       >
         <button
           onClick={onClose}
-          style={{
-            position: 'absolute', top: 24, right: 24,
-            background: 'none', border: 'none',
-            fontSize: 20, cursor: 'pointer', color: 'var(--text2)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}
+          className="absolute top-6 right-6 bg-transparent border-none text-[20px] cursor-pointer text-muted flex items-center justify-center hover:text-text transition-colors duration-150"
           title="Fechar"
         >
           ✕
         </button>
-        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, marginBottom: 24, paddingRight: 32 }}>{title}</h3>
+        <h3 className="font-body text-[20px] font-bold text-text mb-6 pr-8">{title}</h3>
         {children}
       </div>
     </div>
@@ -146,12 +151,8 @@ interface FormFieldProps {
 
 export function FormField({ label, children }: FormFieldProps) {
   return (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{
-        display: 'block', fontSize: 12.5, fontWeight: 500,
-        color: 'var(--text2)', marginBottom: 6,
-        textTransform: 'uppercase', letterSpacing: '0.5px',
-      }}>
+    <div className="mb-4">
+      <label className="block text-[13px] font-semibold text-muted mb-1.5">
         {label}
       </label>
       {children}
@@ -159,22 +160,18 @@ export function FormField({ label, children }: FormFieldProps) {
   )
 }
 
-const inputStyle: React.CSSProperties = {
-  width: 'stretch', padding: '10px 14px', border: '1px solid var(--border)',
-  borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: 14,
-  background: 'var(--bg)', color: 'var(--text)', outline: 'none',
-}
+const inputClass = 'w-full px-3.5 py-2.5 bg-surface border border-border rounded-lg font-body text-[14px] text-text outline-none focus:border-accent transition-colors duration-150'
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return <input style={inputStyle} {...props} />
+  return <input className={inputClass} {...props} />
 }
 
 export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select style={inputStyle} {...props} />
+  return <select className={inputClass} {...props} />
 }
 
 export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea style={{ ...inputStyle, resize: 'none' }} {...props} />
+  return <textarea className={`${inputClass} resize-none`} {...props} />
 }
 
 // ─── PAGE HEADER ──────────────────────────────────────────────────
@@ -185,9 +182,9 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle }: PageHeaderProps) {
   return (
-    <div style={{ marginBottom: 32 }}>
-      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700 }}>{title}</h2>
-      {subtitle && <p style={{ color: 'var(--text2)', fontSize: 14, marginTop: 4 }}>{subtitle}</p>}
+    <div className="mb-8">
+      <h2 className="font-display text-[28px] font-bold text-text">{title}</h2>
+      {subtitle && <p className="text-muted text-[14px] mt-1">{subtitle}</p>}
     </div>
   )
 }
@@ -201,10 +198,10 @@ interface TableCardProps {
 
 export function TableCard({ title, action, children }: TableCardProps) {
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, overflow: 'hidden' }}>
+    <div className="bg-surface border border-border rounded-[14px] overflow-hidden">
       {(title || action) && (
-        <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {title && <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 600 }}>{title}</h3>}
+        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+          {title && <h3 className="font-body text-[15px] font-semibold text-text">{title}</h3>}
           {action}
         </div>
       )}

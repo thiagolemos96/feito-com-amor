@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { Product } from '../../types'
 import { Modal, FormField, Input, Textarea, Button } from '../../components/ui'
 import { useUpload } from '../../hooks/useUpload'
@@ -8,19 +8,13 @@ interface ProductModalProps { product?: Product | null; onSave: (data: ProductFo
 const EMPTY: ProductFormData = { name: '', description: '', price: 0, quantity: 0, image: '📷' }
 
 export function ProductModal({ product, onSave, onClose }: ProductModalProps) {
-  const [form, setForm] = useState<ProductFormData>(EMPTY)
-  const [preview, setPreview] = useState<string | null>(null)
+  const [form, setForm] = useState<ProductFormData>(() =>
+    product ? { name: product.name, description: product.description, price: product.price, quantity: product.quantity, image: product.image } : EMPTY
+  )
+  const [preview, setPreview] = useState<string | null>(() =>
+    product?.image.startsWith('http') ? product.image : null
+  )
   const { uploadImage, uploading } = useUpload()
-
-  useEffect(() => {
-    if (product) {
-      setForm({ name: product.name, description: product.description, price: product.price, quantity: product.quantity, image: product.image })
-      setPreview(product.image.startsWith('http') ? product.image : null)
-    } else {
-      setForm(EMPTY)
-      setPreview(null)
-    }
-  }, [product])
 
   const set = (key: keyof ProductFormData, value: string | number) =>
     setForm(prev => ({ ...prev, [key]: value }))
@@ -40,25 +34,34 @@ export function ProductModal({ product, onSave, onClose }: ProductModalProps) {
 
   return (
     <Modal title={product ? 'Editar Produto' : 'Novo Produto'} onClose={onClose} disableOutsideClick>
-      <div style={{ textAlign: 'center', marginBottom: 20 }}>
+      <div className="text-center mb-5">
         {preview
-          ? <img src={preview} alt="preview" style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 12, border: '1px solid var(--border)' }} />
-          : <div style={{ fontSize: 56 }}>{form.image}</div>
+          ? <img src={preview} alt="preview" className="w-[100px] h-[100px] object-cover rounded-xl border border-border inline-block" />
+          : <div className="text-[56px]">{form.image}</div>
         }
       </div>
 
       <FormField label="Emoji (se não tiver foto)">
-        <Input value={form.image.startsWith('http') ? '📷' : form.image} onChange={e => { set('image', e.target.value); setPreview(null) }} maxLength={2} style={{ fontSize: 24, textAlign: 'center', width: '100%', border: '1px solid var(--border)', borderRadius: 8, fontFamily: 'DM Sans, sans-serif', background: 'var(--bg)', color: 'var(--text)', outline: 'none' }} disabled={form.image.startsWith('http')} />
+        <Input
+          value={form.image.startsWith('http') ? '📷' : form.image}
+          onChange={e => { set('image', e.target.value); setPreview(null) }}
+          maxLength={2}
+          style={{ fontSize: 24, textAlign: 'center' }}
+          disabled={form.image.startsWith('http')}
+        />
       </FormField>
 
       <FormField label="Foto do produto (opcional)">
-        <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0px 10px 14px', border: '1px dashed var(--border)', borderRadius: 8, cursor: 'pointer', color: 'var(--text2)', fontSize: 13.5 }}>
-          <span>📁</span>
+        <label className="flex items-center gap-2.5 px-3.5 py-2.5 border border-dashed border-border rounded-lg cursor-pointer text-muted text-[13.5px]">
+          <ion-icon name="folder-open-outline" style={{ fontSize: 18, flexShrink: 0 }} />
           <span>{uploading ? 'Enviando...' : 'Clique para selecionar uma foto'}</span>
-          <input type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} disabled={uploading} />
+          <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" disabled={uploading} />
         </label>
         {preview && (
-          <button onClick={() => { setPreview(null); set('image', '📷') }} style={{ marginTop: 6, fontSize: 12, color: 'var(--red)', background: 'none', border: 'none', cursor: 'pointer' }}>
+          <button
+            onClick={() => { setPreview(null); set('image', '📷') }}
+            className="mt-1.5 text-[12px] text-danger bg-transparent border-none cursor-pointer"
+          >
             ✕ Remover foto
           </button>
         )}
@@ -70,7 +73,7 @@ export function ProductModal({ product, onSave, onClose }: ProductModalProps) {
       <FormField label="Descrição">
         <Textarea rows={2} value={form.description} onChange={e => set('description', e.target.value)} placeholder="Material, tamanho, detalhes..." />
       </FormField>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="grid grid-cols-2 gap-3">
         <FormField label="Preço (R$)">
           <Input type="number" value={form.price} onChange={e => set('price', e.target.value)} />
         </FormField>
@@ -79,7 +82,7 @@ export function ProductModal({ product, onSave, onClose }: ProductModalProps) {
         </FormField>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 24 }}>
+      <div className="flex justify-end gap-2.5 mt-6">
         <Button variant="ghost" onClick={onClose}>Cancelar</Button>
         <Button variant="primary" onClick={handleSave} disabled={uploading}>
           {uploading ? 'Aguarde...' : product ? 'Salvar' : 'Adicionar'}

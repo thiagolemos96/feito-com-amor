@@ -9,6 +9,27 @@ interface FinanceProps {
   products: Product[]
 }
 
+function BarChart({ entries, max, color }: { entries: [string, number][], max: number, color: string }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {entries.map(([label, val]) => (
+        <div key={label} className="flex items-center gap-2.5 text-[13px]">
+          <div className="w-[90px] text-muted text-[12px] shrink-0">
+            {label.includes('-') ? label.split('-').slice(1).reverse().join('/') : label}
+          </div>
+          <div className="flex-1 h-[22px] bg-surface2 rounded overflow-hidden">
+            <div
+              className="h-full rounded transition-[width] duration-500"
+              style={{ background: color, width: `${(val / max) * 100}%` }}
+            />
+          </div>
+          <div className="w-[80px] text-right text-[12.5px] font-medium shrink-0">{fmt(val)}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function Finance({ sales, products }: FinanceProps) {
   const now = new Date()
   const [month, setMonth] = useState(now.getMonth() + 1)
@@ -43,26 +64,12 @@ export function Finance({ sales, products }: FinanceProps) {
   const sellerEntries = Object.entries(bySeller).sort((a, b) => b[1] - a[1])
   const maxSeller = Math.max(...sellerEntries.map(c => c[1]), 1)
 
-  const BarChart = ({ entries, max, color }: { entries: [string, number][], max: number, color: string }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {entries.map(([label, val]) => (
-        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13 }}>
-          <div style={{ width: 90, color: 'var(--text2)', fontSize: 12 }}>{label.includes('-') ? label.split('-').slice(1).reverse().join('/') : label}</div>
-          <div style={{ flex: 1, height: 22, background: 'var(--surface2)', borderRadius: 4, overflow: 'hidden' }}>
-            <div style={{ height: '100%', background: color, borderRadius: 4, width: `${(val / max) * 100}%`, transition: 'width 0.5s' }} />
-          </div>
-          <div style={{ width: 80, textAlign: 'right', fontSize: 12.5, fontWeight: 500 }}>{fmt(val)}</div>
-        </div>
-      ))}
-    </div>
-  )
-
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
+      <div className="flex items-start justify-between flex-wrap gap-4 mb-8">
         <div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 700 }}>Financeiro</h2>
-          <p style={{ color: 'var(--text2)', fontSize: 14, marginTop: 4 }}>Resumo das receitas da loja</p>
+          <h2 className="font-display text-[28px] font-bold text-text">Financeiro</h2>
+          <p className="text-muted text-[14px] mt-1">Resumo das receitas da loja</p>
         </div>
         <ReportButton
           sales={sales}
@@ -74,21 +81,21 @@ export function Finance({ sales, products }: FinanceProps) {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
+      <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}>
         <StatCard label="Receita Total" value={fmt(totalRevenue)} sub={`${filteredSales.length} vendas`} accent="green" />
         <StatCard label="Ticket Médio" value={fmt(avgSale)} sub="por venda" />
         <StatCard label="Mais Vendido" value={bestProduct?.name ?? '—'} accent="yellow" />
         <StatCard label="Produtos Ativos" value={String(products.filter(p => p.quantity > 0).length)} sub="em estoque" />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 24 }}>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, marginBottom: 20 }}>Receita por Dia</h3>
-          <BarChart entries={dateEntries} max={maxDate} color="var(--accent)" />
+      <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+        <div className="bg-surface border border-border rounded-[14px] p-6">
+          <h3 className="font-body font-semibold text-[15px] text-text mb-5">Receita por Dia</h3>
+          <BarChart entries={dateEntries} max={maxDate} color="var(--color-accent)" />
         </div>
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, padding: 24 }}>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, marginBottom: 20 }}>Receita por Vendedor</h3>
-          <BarChart entries={sellerEntries} max={maxSeller} color="var(--green)" />
+        <div className="bg-surface border border-border rounded-[14px] p-6">
+          <h3 className="font-body font-semibold text-[15px] text-text mb-5">Receita por Vendedor</h3>
+          <BarChart entries={sellerEntries} max={maxSeller} color="var(--color-success)" />
         </div>
       </div>
     </div>

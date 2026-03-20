@@ -1,63 +1,91 @@
 import type { Page, NavItem } from '../../types'
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', label: 'Visão Geral', icon: '📊' },
-  { id: 'catalog', label: 'Catálogo', icon: '🛍️' },
-  { id: 'stock', label: 'Estoque', icon: '📦' },
-  { id: 'sales', label: 'Vendas', icon: '💰' },
-  { id: 'finance', label: 'Financeiro', icon: '📈' },
+  { id: 'dashboard', label: 'Visão Geral', icon: 'grid-outline' },
+  { id: 'catalog', label: 'Catálogo', icon: 'bag-handle-outline' },
+  { id: 'stock', label: 'Estoque', icon: 'cube-outline' },
+  { id: 'sales', label: 'Vendas', icon: 'cash-outline' },
+  { id: 'finance', label: 'Financeiro', icon: 'bar-chart-outline' },
 ]
 
 interface SidebarProps {
   activePage: Page
   onNavigate: (page: Page) => void
   onSignOut: () => void
+  isMobile: boolean
+  isOpen: boolean
+  onClose: () => void
+  theme: 'light' | 'dark'
+  onToggleTheme: () => void
 }
 
-export function Sidebar({ activePage, onNavigate, onSignOut }: SidebarProps) {
+export function Sidebar({
+  activePage,
+  onNavigate,
+  onSignOut,
+  isMobile,
+  isOpen,
+  theme,
+  onToggleTheme,
+}: SidebarProps) {
+  const asideClass = [
+    'w-[220px] min-h-screen bg-sidebar flex flex-col fixed left-0 top-0 bottom-0 z-[150]',
+    isMobile ? 'transition-transform duration-[250ms]' : '',
+    isMobile ? (isOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0',
+    isMobile && isOpen ? 'shadow-[4px_0_24px_rgba(0,0,0,0.35)]' : '',
+  ].filter(Boolean).join(' ')
+
   return (
-    <aside style={{
-      width: 220, minHeight: '100vh', background: 'var(--text)',
-      display: 'flex', flexDirection: 'column',
-      position: 'fixed', left: 0, top: 0, bottom: 0,
-    }}>
-      <div style={{ padding: '28px 24px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", color: '#faf7f2', fontSize: 18, fontWeight: 700 }}>
+    <aside className={asideClass}>
+      <div className="px-6 pt-7 pb-5 border-b border-white/8">
+        <h1 className="font-display text-[#faf7f2] text-[18px] font-bold leading-tight">
           Feito Com Amor
         </h1>
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3, letterSpacing: '0.5px' }}>
+        <p className="text-white/40 text-[11px] mt-0.5">
           Gestão de Artesanato
         </p>
       </div>
 
-      <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {NAV_ITEMS.map(item => (
-          <button
-            key={item.id}
-            onClick={() => onNavigate(item.id)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '10px 14px', border: 'none', borderRadius: 8,
-              cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-              fontSize: 13.5, textAlign: 'left', width: '100%',
-              transition: 'all 0.15s',
-              background: activePage === item.id ? 'var(--accent)' : 'transparent',
-              color: activePage === item.id ? '#fff' : 'rgba(255,255,255,0.5)',
-              fontWeight: activePage === item.id ? 500 : 400,
-            }}
-          >
-            <span style={{ fontSize: 16, width: 20, textAlign: 'center' }}>{item.icon}</span>
-            {item.label}
-          </button>
-        ))}
+      <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
+        {NAV_ITEMS.map(item => {
+          const isActive = activePage === item.id
+          return (
+            <button
+              key={item.id}
+              onClick={() => onNavigate(item.id)}
+              className={[
+                'flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border-none',
+                'cursor-pointer font-body text-[13.5px] text-left w-full transition-all duration-150',
+                isActive
+                  ? 'bg-accent text-white font-medium'
+                  : 'bg-transparent text-white/50 font-normal hover:bg-white/5 hover:text-white/75',
+              ].join(' ')}
+            >
+              <span className="w-5 flex items-center justify-center shrink-0">
+                <ion-icon name={item.icon} style={{ fontSize: 17 }} />
+              </span>
+              {item.label}
+            </button>
+          )
+        })}
       </nav>
 
-      <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="px-3 py-3 border-t border-white/8 flex flex-col gap-0.5">
+        {!isMobile && (
+          <button
+            onClick={onToggleTheme}
+            className="w-full px-3.5 py-2.5 rounded-lg bg-transparent text-white/50 text-[13px] font-body flex items-center gap-2.5 hover:bg-white/5 hover:text-white/75 transition-all duration-150 text-left border-none cursor-pointer"
+          >
+            <ion-icon name={theme === 'dark' ? 'sunny-outline' : 'moon-outline'} style={{ fontSize: 16 }} />
+            {theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+          </button>
+        )}
         <button
           onClick={onSignOut}
-          style={{ width: '100%', padding: '9px 14px', border: 'none', borderRadius: 8, background: 'transparent', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", fontSize: 13, textAlign: 'left' }}
+          className="w-full px-3.5 py-2.5 rounded-lg bg-transparent text-white/50 text-[13px] font-body flex items-center gap-2.5 hover:bg-white/5 hover:text-white/75 transition-all duration-150 text-left border-none cursor-pointer"
         >
-          🚪 Sair
+          <ion-icon name="log-out-outline" style={{ fontSize: 16 }} />
+          Sair
         </button>
       </div>
     </aside>
