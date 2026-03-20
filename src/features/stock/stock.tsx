@@ -8,8 +8,8 @@ interface StockProps {
   onAdjust: (id: number, delta: number) => void
 }
 
-const thClass = 'bg-surface2 px-5 py-[11px] text-left text-[12px] font-semibold text-muted'
-const tdClass = 'px-5 py-[14px] border-b border-border text-[13.5px] align-middle'
+const thClass = 'bg-surface2 px-3 sm:px-5 py-[11px] text-left text-[12px] font-semibold text-muted'
+const tdClass = 'px-3 sm:px-5 py-[12px] border-b border-border text-[13px] align-middle'
 
 export function Stock({ products, onAdjust }: StockProps) {
   const [adjustingId, setAdjustingId] = useState<number | null>(null)
@@ -45,12 +45,12 @@ export function Stock({ products, onAdjust }: StockProps) {
 
       <div className="bg-surface border border-border rounded-[14px] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse" style={{ minWidth: 480 }}>
+          <table className="w-full border-collapse">
             <thead>
               <tr>
                 <th className={thClass}>Produto</th>
-                <th className={thClass}>Preço</th>
-                <th className={thClass}>Estoque</th>
+                <th className={`${thClass} hidden sm:table-cell`}>Preço</th>
+                <th className={thClass}>Qtd</th>
                 <th className={thClass}>Status</th>
                 <th className={thClass}></th>
               </tr>
@@ -62,7 +62,7 @@ export function Stock({ products, onAdjust }: StockProps) {
                     <strong>{p.name}</strong>
                     <div className="text-muted text-[12px] mt-0.5">{p.description}</div>
                   </td>
-                  <td className={`${tdClass} text-accent font-bold`}>{fmt(p.price)}</td>
+                  <td className={`${tdClass} text-accent font-bold hidden sm:table-cell`}>{fmt(p.price)}</td>
                   <td className={`${tdClass} text-[16px] font-bold`}>{p.quantity}</td>
                   <td className={tdClass}>{stockBadge(p)}</td>
                   <td className={tdClass}>

@@ -70,15 +70,18 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
 
   const getProductName = (id: number) => products.find(p => p.id === id)?.name ?? '?'
 
-  const thClass = 'bg-surface2 px-5 py-[11px] text-left text-[12px] font-semibold text-muted'
-  const tdClass = 'px-5 py-[14px] border-b border-border text-[13.5px] align-middle'
+  const thClass = 'bg-surface2 px-3 sm:px-5 py-[11px] text-left text-[12px] font-semibold text-muted'
+  const tdClass = 'px-3 sm:px-5 py-[12px] border-b border-border text-[13px] align-middle'
   const filterSelectClass = 'px-3 py-2 border border-border rounded-lg font-body text-[13.5px] bg-surface text-text outline-none'
 
   return (
     <div>
-      <div className="flex items-start justify-between flex-wrap gap-4 mb-8">
-        <PageHeader title="Vendas" subtitle={`${filteredSales.length} vendas exibidas`} />
-        <div className="flex items-center gap-2.5 flex-wrap">
+      <div className="mb-6">
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <PageHeader title="Vendas" subtitle={`${filteredSales.length} vendas exibidas`} />
+          <Button variant="primary" onClick={() => setShowModal(true)} style={{ flexShrink: 0 }}>+ Registrar Venda</Button>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
           <select value={day} onChange={e => setDay(Number(e.target.value))} className={filterSelectClass}>
             <option value={0}>Todos os dias</option>
             {days.map(d => <option key={d} value={d}>{String(d).padStart(2, '0')}</option>)}
@@ -89,34 +92,33 @@ export function Sales({ products, sales, onAddSale }: SalesProps) {
           <select value={year} onChange={e => setYear(Number(e.target.value))} className={filterSelectClass}>
             {[2024, 2025, 2026].map(y => <option key={y} value={y}>{y}</option>)}
           </select>
-          <Button variant="primary" onClick={() => setShowModal(true)}>+ Registrar Venda</Button>
         </div>
       </div>
 
       <div className="bg-surface border border-border rounded-[14px] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse" style={{ minWidth: 680 }}>
+          <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className={thClass}>#</th>
+                <th className={`${thClass} hidden sm:table-cell`}>#</th>
                 <th className={thClass}>Data</th>
                 <th className={thClass}>Vendedor</th>
                 <th className={thClass}>Produtos</th>
                 <th className={thClass}>Total</th>
-                <th className={thClass}>Obs.</th>
+                <th className={`${thClass} hidden sm:table-cell`}>Obs.</th>
               </tr>
             </thead>
             <tbody>
               {filteredSales.map(s => (
                 <tr key={s.id}>
-                  <td className={`${tdClass} text-muted text-[12px]`}>#{String(s.id).slice(-4)}</td>
+                  <td className={`${tdClass} text-muted text-[12px] hidden sm:table-cell`}>#{String(s.id).slice(-4)}</td>
                   <td className={`${tdClass} text-muted`}>{formatDate(s.date)}</td>
                   <td className={`${tdClass} text-muted`}>{s.seller || '—'}</td>
                   <td className={`${tdClass} text-[13px]`}>{s.items.map(it => `${it.qty}x ${getProductName(it.productId)}`).join(', ')}</td>
                   <td className={tdClass}>
                     <strong className="font-body font-bold text-accent text-[15px]">{fmt(s.total)}</strong>
                   </td>
-                  <td className={`${tdClass} text-muted text-[12.5px]`}>{s.notes || '—'}</td>
+                  <td className={`${tdClass} text-muted text-[12.5px] hidden sm:table-cell`}>{s.notes || '—'}</td>
                 </tr>
               ))}
             </tbody>
