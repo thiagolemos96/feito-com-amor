@@ -8,6 +8,8 @@ interface SalesProps {
   products: Product[]
   sales: Sale[]
   onAddSale: (items: SaleItem[], notes: string, seller: string) => void
+  showModal: boolean
+  setShowModal: (v: boolean) => void
 }
 
 interface SaleItemForm {
@@ -15,8 +17,7 @@ interface SaleItemForm {
   qty: number
 }
 
-export function Sales({ products, sales, onAddSale }: SalesProps) {
-  const [showModal, setShowModal] = useState(false)
+export function Sales({ products, sales, onAddSale, showModal, setShowModal }: SalesProps) {
   const [items, setItems] = useState<SaleItemForm[]>([{ productId: '', qty: 1 }])
   const [notes, setNotes] = useState('')
   const [seller, setSeller] = useState('')

@@ -5,6 +5,7 @@ import { useProducts } from './hooks/useProducts'
 import { useSales } from './hooks/useSales'
 import { Login } from './features/auth/login'
 import { Sidebar } from './components/layout/sidebar'
+import { BottomNav } from './components/layout/BottomNav'
 import { Dashboard } from './features/dashboard/dashboard'
 import { Catalog } from './features/catalog/catalog'
 import { Stock } from './features/stock/stock'
@@ -21,7 +22,7 @@ export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() =>
     (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
   )
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showSaleModal, setShowSaleModal] = useState(false)
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
 
   useEffect(() => {
@@ -47,55 +48,73 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen bg-bg">
-      {isMobile && sidebarOpen && (
-        <div
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-black/50 z-[149] backdrop-blur-sm"
-        />
-      )}
-
       {isMobile && (
-        <header className="fixed top-0 left-0 right-0 h-14 bg-surface border-b border-border flex items-center justify-between px-5 z-[99]">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 text-text flex items-center"
-            aria-label="Abrir menu"
-          >
-            <ion-icon name="menu-outline" style={{ fontSize: 24 }} />
-          </button>
-          <span className="font-display text-[17px] font-bold text-text">Feito Com Amor</span>
-          <button
-            onClick={toggleTheme}
-            className="p-2 text-muted flex items-center"
-            aria-label="Alternar tema"
-          >
-            <ion-icon name={theme === 'dark' ? 'sunny-outline' : 'moon-outline'} style={{ fontSize: 22 }} />
+        <header
+          className="fixed top-0 left-0 right-0 z-[99] md:hidden flex items-center justify-between px-4"
+          style={{ height: 40, background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border)' }}
+        >
+          <span className="font-display font-bold text-accent" style={{ fontSize: 15 }}>
+            Feito com Amor
+          </span>
+          <button onClick={toggleTheme} className="p-2 flex items-center text-muted" aria-label="Alternar tema">
+            <ion-icon name={theme === 'dark' ? 'sunny-outline' : 'moon-outline'} style={{ fontSize: 20 }} />
           </button>
         </header>
       )}
 
-      <Sidebar
-        activePage={page}
-        onNavigate={(p) => { setPage(p); setSidebarOpen(false) }}
-        onSignOut={signOut}
-        isMobile={isMobile}
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-      />
+      {!isMobile && (
+        <Sidebar
+          activePage={page}
+          onNavigate={setPage}
+          onSignOut={signOut}
+          isMobile={false}
+          isOpen={false}
+          onClose={() => {}}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+      )}
 
       <main className={
         isMobile
-          ? 'ml-0 flex-1 pt-[72px] px-5 pb-6 min-h-screen'
+          ? 'ml-0 flex-1 pt-[48px] pb-[80px] px-4 min-h-screen'
           : 'ml-[220px] flex-1 px-10 py-9 min-h-screen'
       }>
         {page === 'dashboard' && <Dashboard products={products} sales={sales} />}
         {page === 'catalog' && <Catalog products={products} onAdd={addProduct} onUpdate={updateProduct} onRemove={removeProduct} />}
         {page === 'stock' && <Stock products={products} onAdjust={adjustStock} />}
-        {page === 'sales' && <Sales products={products} sales={sales} onAddSale={handleAddSale} />}
+        {page === 'sales' && <Sales products={products} sales={sales} onAddSale={handleAddSale} showModal={showSaleModal} setShowModal={setShowSaleModal} />}
         {page === 'finance' && <Finance sales={sales} products={products} />}
       </main>
+
+      {isMobile && (
+        <button
+          onClick={() => { setPage('sales'); setShowSaleModal(true) }}
+          aria-label="Nova Venda"
+          style={{
+            position: 'fixed',
+            bottom: 80,
+            right: 20,
+            width: 52,
+            height: 52,
+            borderRadius: '50%',
+            background: 'var(--color-success)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 140,
+          }}
+        >
+          <ion-icon name="add-outline" style={{ fontSize: 28, color: 'white' }} />
+        </button>
+      )}
+
+      {isMobile && (
+        <BottomNav activePage={page} onNavigate={setPage} />
+      )}
     </div>
   )
 }
