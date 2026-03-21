@@ -1,3 +1,5 @@
+import type { Sale } from '../types'
+
 export const fmt = (value: number): string =>
   value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
@@ -18,4 +20,17 @@ export const getStockStatus = (stock: number): 'ok' | 'low' | 'empty' => {
   if (stock === 0) return 'empty'
   if (stock <= 2) return 'low'
   return 'ok'
+}
+
+export function getDailyRevenue(sales: Sale[], days: number): number[] {
+  const base = today()
+  const result: number[] = []
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(base)
+    d.setDate(d.getDate() - i)
+    const dateStr = d.toISOString().split('T')[0]
+    const total = sales.filter(s => s.date === dateStr).reduce((acc, s) => acc + s.total, 0)
+    result.push(total)
+  }
+  return result
 }
