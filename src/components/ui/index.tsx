@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import type { ReactNode } from 'react'
 
 // ─── BADGE ────────────────────────────────────────────────────────
@@ -28,8 +29,59 @@ export function Badge({ variant, children }: BadgeProps) {
   )
 }
 
+// ─── SPARKLINE ────────────────────────────────────────────────────
+interface SparklineProps {
+  data: number[]
+  color?: string
+  fill?: boolean
+  width?: number
+  height?: number
+}
+
+export function Sparkline({ data, color = 'currentColor', fill = false, width = 100, height = 40 }: SparklineProps) {
+  const uid = useId()
+  const gradId = `sg${uid.replace(/:/g, '')}`
+  if (data.length < 2) return null
+  const max = Math.max(...data, 1)
+  const min = Math.min(...data)
+  const range = max - min || 1
+  const pts = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * width
+    const y = height - ((v - min) / range) * (height - 6) - 3
+    return [x, y] as [number, number]
+  })
+  const polylinePoints = pts.map(([x, y]) => `${x},${y}`).join(' ')
+  const [lastX, lastY] = pts[pts.length - 1]
+  const [firstX, firstY] = pts[0]
+  const areaPath = `M${firstX},${firstY} ` +
+    pts.slice(1).map(([x, y]) => `L${x},${y}`).join(' ') +
+    ` L${width},${height} L0,${height} Z`
+  return (
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
+      {fill && (
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity={0.25} />
+            <stop offset="100%" stopColor={color} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+      )}
+      {fill && <path d={areaPath} fill={`url(#${gradId})`} />}
+      <polyline
+        points={polylinePoints}
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx={lastX} cy={lastY} r={3} fill={color} />
+    </svg>
+  )
+}
+
 // ─── BUTTON ───────────────────────────────────────────────────────
-type ButtonVariant = 'primary' | 'ghost' | 'danger'
+type ButtonVariant = 'primary' | 'ghost' | 'danger' | 'edit'
 
 interface ButtonProps {
   variant?: ButtonVariant
@@ -43,6 +95,7 @@ const buttonVariants: Record<ButtonVariant, string> = {
   primary: 'bg-accent text-white hover:bg-accent2',
   ghost: 'bg-transparent text-muted border border-border hover:bg-surface2',
   danger: 'bg-danger/10 text-danger border border-danger/20 hover:bg-danger/20',
+  edit: 'bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20',
 }
 
 export function Button({ variant = 'ghost', onClick, children, style, disabled }: ButtonProps) {
@@ -66,6 +119,7 @@ interface StatCardProps {
   value: string
   sub?: string
   accent?: AccentColor
+  sparkline?: ReactNode
 }
 
 const accentHover: Record<AccentColor, string> = {
@@ -75,12 +129,19 @@ const accentHover: Record<AccentColor, string> = {
   red: 'hover:border-danger',
 }
 
-export function StatCard({ label, value, sub, accent = 'default' }: StatCardProps) {
+export function StatCard({ label, value, sub, accent = 'default', sparkline }: StatCardProps) {
   return (
-    <div className={`bg-surface border-2 border-border rounded-[14px] p-[22px] transition-colors duration-150 ${accentHover[accent]}`}>
-      <div className="text-[12px] text-muted font-semibold">{label}</div>
-      <div className="font-body text-2xl font-bold mt-2 text-text">{value}</div>
-      {sub && <div className="text-[12px] text-muted mt-1">{sub}</div>}
+    <div className={`bg-surface border-2 border-border rounded-[14px] p-[22px] transition-colors duration-150 relative overflow-hidden ${accentHover[accent]}`}>
+      {sparkline && (
+        <div className="absolute right-0 top-0 bottom-0 flex items-center pointer-events-none opacity-80">
+          {sparkline}
+        </div>
+      )}
+      <div className="relative z-10">
+        <div className="text-[12px] text-muted font-semibold">{label}</div>
+        <div className="font-body text-2xl font-bold mt-2 text-text">{value}</div>
+        {sub && <div className="text-[12px] text-muted mt-1">{sub}</div>}
+      </div>
     </div>
   )
 }
@@ -90,15 +151,21 @@ interface HeroStatCardProps {
   label: string
   value: string
   sub?: string
+  sparkline?: ReactNode
 }
 
-export function HeroStatCard({ label, value, sub }: HeroStatCardProps) {
+export function HeroStatCard({ label, value, sub, sparkline }: HeroStatCardProps) {
   return (
     <div className="bg-accent rounded-[14px] p-8 relative overflow-hidden">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(255,255,255,0.10) 0%, transparent 60%)' }}
       />
+      {sparkline && (
+        <div className="absolute right-0 top-0 bottom-0 flex items-center pointer-events-none">
+          {sparkline}
+        </div>
+      )}
       <div className="relative z-10">
         <div className="text-[12px] text-white/70 font-semibold mb-2.5">{label}</div>
         <div className="font-body text-[42px] font-extrabold text-white leading-none">{value}</div>
@@ -197,21 +264,87 @@ export function PageHeader({ title, subtitle }: PageHeaderProps) {
 
 // ─── TABLE CARD ───────────────────────────────────────────────────
 interface TableCardProps {
-  title?: string
+  title?: ReactNode
+  subtitle?: string
   action?: ReactNode
   children: ReactNode
 }
 
-export function TableCard({ title, action, children }: TableCardProps) {
+export function TableCard({ title, subtitle, action, children }: TableCardProps) {
   return (
     <div className="bg-surface border border-border rounded-[14px] overflow-hidden">
       {(title || action) && (
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-          {title && <h3 className="font-body text-[15px] font-semibold text-text">{title}</h3>}
+          <div>
+            {title && <h3 className="font-body text-[15px] font-semibold text-text">{title}</h3>}
+            {subtitle && <p className="font-body text-[12px] text-muted mt-0.5">{subtitle}</p>}
+          </div>
           {action}
         </div>
       )}
       {children}
+    </div>
+  )
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────
+
+export interface ToastItem {
+  id: string
+  message: string
+  type: 'success' | 'error'
+  subtitle?: string
+  exiting?: boolean
+}
+
+interface ToastContainerProps {
+  toasts: ToastItem[]
+  onDismiss: (id: string) => void
+}
+
+export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
+  if (toasts.length === 0) return null
+
+  return (
+    <div style={{ position: 'fixed', top: 16, right: 16, zIndex: 200, display: 'flex', flexDirection: 'column', gap: 8, pointerEvents: 'none' }}>
+      {toasts.map(t => {
+        const ok = t.type === 'success'
+        return (
+          <div
+            key={t.id}
+            className={t.exiting ? '' : 'toast-enter'}
+            style={{
+              pointerEvents: 'all',
+              background: ok ? 'var(--color-toast-success-bg)' : 'var(--color-toast-error-bg)',
+              border: `1px solid ${ok ? 'var(--color-toast-success-border)' : 'var(--color-toast-error-border)'}`,
+              borderRadius: 10,
+              padding: '12px 16px',
+              width: 280,
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 10,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+              opacity: t.exiting ? 0 : 1,
+              transform: t.exiting ? 'translateX(20px)' : 'translateX(0)',
+              transition: 'opacity 300ms ease, transform 300ms ease',
+            }}
+          >
+            <span style={{ color: ok ? 'var(--color-success)' : 'var(--color-danger)', fontSize: 15, marginTop: 1, flexShrink: 0 }}>
+              {ok ? '✓' : '✕'}
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text)' }}>{t.message}</div>
+              {t.subtitle && <div style={{ fontSize: 11.5, color: 'var(--color-muted)', marginTop: 2 }}>{t.subtitle}</div>}
+            </div>
+            <button
+              onClick={() => onDismiss(t.id)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)', padding: 0, fontSize: 13, lineHeight: 1, flexShrink: 0 }}
+            >
+              ✕
+            </button>
+          </div>
+        )
+      })}
     </div>
   )
 }
