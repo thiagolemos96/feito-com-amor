@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useId } from 'react'
 import type { Product, Sale } from '../../types'
 import { fmt } from '../../lib/utils'
 import { StatCard } from '../../components/ui'
@@ -30,6 +30,70 @@ function BarChart({ entries, max, color }: { entries: [string, number][], max: n
   )
 }
 
+function AreaChart({ entries, month, year }: { entries: [string, number][], month: number, year: number }) {
+  const uid = useId()
+  const gradId = `ac${uid.replace(/:/g, '')}`
+  const daysInMonth = new Date(year, month, 0).getDate()
+
+  const byDay: number[] = Array(daysInMonth).fill(0)
+  entries.forEach(([date, val]) => {
+    const day = parseInt(date.split('-')[2]) - 1
+    if (day >= 0 && day < daysInMonth) byDay[day] = val
+  })
+
+  const max = Math.max(...byDay, 1)
+  const vW = 600
+  const vH = 160
+  const pad = { t: 10, b: 30, l: 8, r: 8 }
+  const cW = vW - pad.l - pad.r
+  const cH = vH - pad.t - pad.b
+  const axisY = pad.t + cH
+
+  const xs = byDay.map((_, i) => pad.l + (i / Math.max(daysInMonth - 1, 1)) * cW)
+  const ys = byDay.map(v => pad.t + (1 - v / max) * cH)
+
+  const linePoints = xs.map((x, i) => `${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ')
+  const lineD = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ')
+  const areaD = lineD + ` L${xs[xs.length - 1].toFixed(1)},${axisY} L${xs[0].toFixed(1)},${axisY} Z`
+
+  const labelDays = [...new Set([0, 9, 19, daysInMonth - 1])]
+
+  return (
+    <svg
+      viewBox={`0 0 ${vW} ${vH}`}
+      width="100%"
+      height={160}
+      preserveAspectRatio="none"
+      style={{ display: 'block' }}
+    >
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.22} />
+          <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={areaD} fill={`url(#${gradId})`} />
+      <polyline
+        points={linePoints}
+        fill="none"
+        stroke="var(--color-accent)"
+        strokeWidth={2.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {byDay.map((v, i) => v > 0 && (
+        <circle key={i} cx={xs[i]} cy={ys[i]} r={3.5} fill="var(--color-accent)" />
+      ))}
+      <line x1={pad.l} y1={axisY} x2={vW - pad.r} y2={axisY} stroke="var(--color-border)" strokeWidth={1} />
+      {labelDays.map(i => (
+        <text key={i} x={xs[i]} y={axisY + 16} textAnchor="middle" fontSize={11} fill="var(--color-muted)">
+          {i + 1}
+        </text>
+      ))}
+    </svg>
+  )
+}
+
 export function Finance({ sales, products }: FinanceProps) {
   const now = new Date()
   const [month, setMonth] = useState(now.getMonth() + 1)
@@ -55,7 +119,6 @@ export function Finance({ sales, products }: FinanceProps) {
   const byDate: Record<string, number> = {}
   filteredSales.forEach(s => { byDate[s.date] = (byDate[s.date] || 0) + s.total })
   const dateEntries = Object.entries(byDate).sort((a, b) => a[0].localeCompare(b[0]))
-  const maxDate = Math.max(...dateEntries.map(d => d[1]), 1)
 
   const bySeller: Record<string, number> = {}
   filteredSales.forEach(s => {
@@ -81,19 +144,19 @@ export function Finance({ sales, products }: FinanceProps) {
         />
       </div>
 
-      <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <StatCard label="Receita Total" value={fmt(totalRevenue)} sub={`${filteredSales.length} vendas`} accent="green" />
         <StatCard label="Ticket Médio" value={fmt(avgSale)} sub="por venda" />
         <StatCard label="Mais Vendido" value={bestProduct?.name ?? '—'} accent="yellow" />
         <StatCard label="Produtos Ativos" value={String(products.filter(p => p.quantity > 0).length)} sub="em estoque" />
       </div>
 
-      <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-        <div className="bg-surface border border-border rounded-[14px] p-6">
-          <h3 className="font-body font-semibold text-[15px] text-text mb-5">Receita por Dia</h3>
-          <BarChart entries={dateEntries} max={maxDate} color="var(--color-accent)" />
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
+        <div className="md:col-span-3 bg-surface border border-border rounded-[14px] p-6">
+          <h3 className="font-body font-semibold text-[15px] text-text mb-4">Receita por Dia</h3>
+          <AreaChart entries={dateEntries} month={month} year={year} />
         </div>
-        <div className="bg-surface border border-border rounded-[14px] p-6">
+        <div className="md:col-span-2 bg-surface border border-border rounded-[14px] p-6">
           <h3 className="font-body font-semibold text-[15px] text-text mb-5">Receita por Vendedor</h3>
           <BarChart entries={sellerEntries} max={maxSeller} color="var(--color-success)" />
         </div>
