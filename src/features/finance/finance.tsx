@@ -1,4 +1,4 @@
-import { useState, useId } from 'react'
+import { useState, useId, useRef } from 'react'
 import type { Product, Sale } from '../../types'
 import { fmt } from '../../lib/utils'
 import { StatCard } from '../../components/ui'
@@ -30,9 +30,14 @@ function BarChart({ entries, max, color }: { entries: [string, number][], max: n
   )
 }
 
+type HoverState = { dayIndex: number; mouseX: number; mouseY: number } | null
+
 function AreaChart({ entries, month, year }: { entries: [string, number][], month: number, year: number }) {
   const uid = useId()
   const gradId = `ac${uid.replace(/:/g, '')}`
+  const svgRef = useRef<SVGSVGElement>(null)
+  const [hovered, setHovered] = useState<HoverState>(null)
+
   const daysInMonth = new Date(year, month, 0).getDate()
 
   const byDay: number[] = Array(daysInMonth).fill(0)
@@ -58,39 +63,115 @@ function AreaChart({ entries, month, year }: { entries: [string, number][], mont
 
   const labelDays = [...new Set([0, 9, 19, daysInMonth - 1])]
 
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    const rect = svgRef.current?.getBoundingClientRect()
+    if (!rect) return
+    // Convert screen X to SVG coordinate space, then to day index
+    const svgX = ((e.clientX - rect.left) / rect.width) * vW
+    const raw = (svgX - pad.l) / cW * (daysInMonth - 1)
+    const dayIndex = Math.max(0, Math.min(daysInMonth - 1, Math.round(raw)))
+    setHovered({ dayIndex, mouseX: e.clientX - rect.left, mouseY: e.clientY - rect.top })
+  }
+
+  const hDay = hovered?.dayIndex ?? -1
+  const hVal = hDay >= 0 ? byDay[hDay] : 0
+
+  // Tooltip: keep it inside the container (flip when close to right edge)
+  const tooltipLeft = hovered
+    ? hovered.mouseX > (svgRef.current?.getBoundingClientRect().width ?? 0) * 0.65
+      ? hovered.mouseX - 130
+      : hovered.mouseX + 14
+    : 0
+
   return (
-    <svg
-      viewBox={`0 0 ${vW} ${vH}`}
-      width="100%"
-      height={160}
-      preserveAspectRatio="none"
-      style={{ display: 'block' }}
-    >
-      <defs>
-        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.22} />
-          <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0} />
-        </linearGradient>
-      </defs>
-      <path d={areaD} fill={`url(#${gradId})`} />
-      <polyline
-        points={linePoints}
-        fill="none"
-        stroke="var(--color-accent)"
-        strokeWidth={2.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {byDay.map((v, i) => v > 0 && (
-        <circle key={i} cx={xs[i]} cy={ys[i]} r={3.5} fill="var(--color-accent)" />
-      ))}
-      <line x1={pad.l} y1={axisY} x2={vW - pad.r} y2={axisY} stroke="var(--color-border)" strokeWidth={1} />
-      {labelDays.map(i => (
-        <text key={i} x={xs[i]} y={axisY + 16} textAnchor="middle" fontSize={11} fill="var(--color-muted)">
-          {i + 1}
-        </text>
-      ))}
-    </svg>
+    <div style={{ position: 'relative' }}>
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${vW} ${vH}`}
+        width="100%"
+        height={160}
+        preserveAspectRatio="none"
+        style={{ display: 'block', cursor: 'crosshair' }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setHovered(null)}
+      >
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.22} />
+            <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <path d={areaD} fill={`url(#${gradId})`} />
+        <polyline
+          points={linePoints}
+          fill="none"
+          stroke="var(--color-accent)"
+          strokeWidth={2.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {byDay.map((v, i) => (
+          <circle
+            key={i}
+            cx={xs[i]}
+            cy={ys[i]}
+            r={i === hDay ? 5.5 : (v > 0 ? 3.5 : 0)}
+            fill="var(--color-accent)"
+            style={{ transition: 'r 0.1s' }}
+          />
+        ))}
+        {/* Crosshair */}
+        {hovered && (
+          <line
+            x1={xs[hDay]}
+            y1={pad.t}
+            x2={xs[hDay]}
+            y2={axisY}
+            stroke="var(--color-accent)"
+            strokeWidth={1}
+            strokeDasharray="4 3"
+            opacity={0.5}
+          />
+        )}
+        <line x1={pad.l} y1={axisY} x2={vW - pad.r} y2={axisY} stroke="var(--color-border)" strokeWidth={1} />
+        {labelDays.map(i => (
+          <text key={i} x={xs[i]} y={axisY + 16} textAnchor="middle" fontSize={11} fill="var(--color-muted)">
+            {i + 1}
+          </text>
+        ))}
+      </svg>
+
+      {/* HTML tooltip — lives outside SVG to avoid coordinate distortion */}
+      {hovered && (
+        <div
+          style={{
+            position: 'absolute',
+            top: Math.max(0, hovered.mouseY - 48),
+            left: tooltipLeft,
+            pointerEvents: 'none',
+            zIndex: 10,
+          }}
+        >
+          <div
+            className="rounded-[8px] px-3 py-2 text-[12.5px] font-body font-medium shadow-lg"
+            style={{
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text)',
+              minWidth: 116,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <div className="text-muted text-[11px] mb-0.5">
+              Dia {hDay + 1} de {new Date(year, month - 1, 1).toLocaleString('pt-BR', { month: 'long' })}
+            </div>
+            <div style={{ color: 'var(--color-accent)', fontWeight: 700 }}>
+              {hVal > 0 ? fmt(hVal) : 'Sem vendas'}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
