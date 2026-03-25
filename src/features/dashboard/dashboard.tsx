@@ -11,7 +11,12 @@ export function Dashboard({ products, sales }: DashboardProps) {
   const TODAY = new Date().toISOString().split('T')[0]
   const todaySales = sales.filter(s => s.date === TODAY)
   const todayRevenue = todaySales.reduce((a, s) => a + s.total, 0)
-  const weekRevenue = sales.reduce((a, s) => a + s.total, 0)
+  const now = new Date()
+  const weekStart = new Date(now)
+  weekStart.setDate(now.getDate() - now.getDay())
+  const weekStartStr = weekStart.toISOString().split('T')[0]
+  const weekSales = sales.filter(s => s.date >= weekStartStr && s.date <= TODAY)
+  const weekRevenue = weekSales.reduce((a, s) => a + s.total, 0)
   const lowStock = products.filter(p => p.quantity <= 2)
   const recentSales = [...sales].sort((a, b) => b.id - a.id).slice(0, 5)
 
@@ -32,7 +37,7 @@ export function Dashboard({ products, sales }: DashboardProps) {
         <StatCard
           label="Esta Semana"
           value={fmt(weekRevenue)}
-          sub={`${sales.length} vendas`}
+          sub={`${weekSales.length} vendas`}
         />
         <StatCard
           label="Produtos"

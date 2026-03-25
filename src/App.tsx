@@ -17,7 +17,7 @@ export default function App() {
   const [page, setPage] = useState<Page>('dashboard')
   const { session, loading, signIn, signOut } = useAuth()
   const { products, addProduct, updateProduct, removeProduct, adjustStock } = useProducts()
-  const { sales, addSale } = useSales()
+  const { sales, addSale, deleteSale, updateSale } = useSales()
 
   const [theme, setTheme] = useState<'light' | 'dark'>(() =>
     (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
@@ -83,7 +83,7 @@ export default function App() {
         {page === 'dashboard' && <Dashboard products={products} sales={sales} />}
         {page === 'catalog' && <Catalog products={products} onAdd={addProduct} onUpdate={updateProduct} onRemove={removeProduct} />}
         {page === 'stock' && <Stock products={products} onAdjust={adjustStock} />}
-        {page === 'sales' && <Sales products={products} sales={sales} onAddSale={handleAddSale} showModal={showSaleModal} setShowModal={setShowSaleModal} />}
+        {page === 'sales' && <Sales products={products} sales={sales} onAddSale={handleAddSale} onDeleteSale={deleteSale} onUpdateSale={updateSale} showModal={showSaleModal} setShowModal={setShowSaleModal} />}
         {page === 'finance' && <Finance sales={sales} products={products} />}
       </main>
 

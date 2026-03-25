@@ -2,6 +2,10 @@
 
 @theme {
   --color-bg: #faf7f2;
+  --color-toast-success-bg: #eef4eb;
+  --color-toast-success-border: #c5d9bb;
+  --color-toast-error-bg: #faecea;
+  --color-toast-error-border: #e8bdb7;
   --color-surface: #ffffff;
   --color-surface2: #f3ede3;
   --color-border: #e8dece;
@@ -33,6 +37,15 @@
   }
 }
 
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.toast-enter {
+  animation: toast-in 200ms ease-out;
+}
+
 [data-theme="dark"] {
   --color-bg: #2a211a;
   --color-surface: #352b22;
@@ -46,4 +59,8 @@
   --color-danger: #d45245;
   --color-warning: #f2c040;
   --color-sidebar: #201810;
+  --color-toast-success-bg: #1e3326;
+  --color-toast-success-border: #2e5038;
+  --color-toast-error-bg: #3a1e1e;
+  --color-toast-error-border: #5e2e2e;
 }

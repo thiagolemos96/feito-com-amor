@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Product } from '../../types'
 import { fmt, getStockStatus } from '../../lib/utils'
 import { Badge, Button } from '../../components/ui'
@@ -20,6 +21,8 @@ const stockVariant = (stock: number) => {
 }
 
 export function ProductCard({ product, onEdit, onRemove }: ProductCardProps) {
+  const [confirming, setConfirming] = useState(false)
+
   return (
     <div className="bg-surface border border-border rounded-[14px] p-5 flex flex-col gap-3 transition-shadow duration-150">
       <div>
@@ -46,15 +49,30 @@ export function ProductCard({ product, onEdit, onRemove }: ProductCardProps) {
         <Badge variant={stockVariant(product.quantity) as 'green' | 'yellow' | 'red'}>{stockLabel(product.quantity)}</Badge>
       </div>
 
-      <div className="flex gap-1.5">
-        <Button variant="ghost" onClick={() => onEdit(product)} style={{ flex: 1, fontSize: 12.5, padding: '7px 0', justifyContent: 'center' }}>
-          <ion-icon name="pencil-outline" style={{ fontSize: 14 }} />
-          Editar
-        </Button>
-        <Button variant="danger" onClick={() => onRemove(product.id)} style={{ fontSize: 12.5, padding: '7px 12px' }}>
-          <ion-icon name="trash-outline" style={{ fontSize: 14 }} />
-        </Button>
-      </div>
+      {confirming ? (
+        <div className="flex flex-col gap-2">
+          <span className="text-[12.5px] text-muted text-center">Excluir este produto?</span>
+          <div className="flex gap-1.5">
+            <Button variant="ghost" onClick={() => setConfirming(false)} style={{ flex: 1, fontSize: 12.5, padding: '7px 0', justifyContent: 'center' }}>
+              Cancelar
+            </Button>
+            <Button variant="danger" onClick={() => onRemove(product.id)} style={{ flex: 1, fontSize: 12.5, padding: '7px 0', justifyContent: 'center' }}>
+              <ion-icon name="trash-outline" style={{ fontSize: 14 }} />
+              Excluir
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex gap-1.5">
+          <Button variant="ghost" onClick={() => onEdit(product)} style={{ flex: 1, fontSize: 12.5, padding: '7px 0', justifyContent: 'center' }}>
+            <ion-icon name="pencil-outline" style={{ fontSize: 14 }} />
+            Editar
+          </Button>
+          <Button variant="danger" onClick={() => setConfirming(true)} style={{ fontSize: 12.5, padding: '7px 12px' }}>
+            <ion-icon name="trash-outline" style={{ fontSize: 14 }} />
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

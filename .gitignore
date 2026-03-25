@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Claude
+.claude/
+.superpowers/
+.playwright-mcp/
+.docs/
+CLAUDE.md
+ARCHITECTURE.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

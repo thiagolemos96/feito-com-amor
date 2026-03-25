@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
 import type { Product } from '../types'
+import { useToast } from '../context/toast'
 
 // Busca todos os produtos junto com o estoque
 const fetchProducts = async (): Promise<Product[]> => {
@@ -15,6 +16,7 @@ const fetchProducts = async (): Promise<Product[]> => {
 
 export function useProducts() {
   const queryClient = useQueryClient()
+  const { toast } = useToast()
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['products'],
@@ -34,7 +36,8 @@ export function useProducts() {
         })
       if (error) throw error
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['products'] }); toast('Produto adicionado', 'success') },
+    onError: () => toast('Erro ao adicionar produto', 'error'),
   })
 
   const updateProduct = useMutation({
@@ -51,7 +54,8 @@ export function useProducts() {
         .eq('id', id)
       if (error) throw error
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['products'] }); toast('Produto atualizado', 'success') },
+    onError: () => toast('Erro ao atualizar produto', 'error'),
   })
 
   const removeProduct = useMutation({
@@ -59,7 +63,8 @@ export function useProducts() {
       const { error } = await supabase.from('products').delete().eq('id', id)
       if (error) throw error
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['products'] }); toast('Produto excluído', 'success') },
+    onError: () => toast('Erro ao excluir produto', 'error'),
   })
 
   const adjustStock = useMutation({
@@ -72,7 +77,8 @@ export function useProducts() {
         .eq('id', id)
       if (error) throw error
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['products'] }); toast('Estoque atualizado', 'success') },
+    onError: () => toast('Erro ao ajustar estoque', 'error'),
   })
 
   return {
